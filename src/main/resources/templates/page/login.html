@@ -3,9 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <title>登录</title>
-    <link rel="shortcut icon" href="../images/stephy.ico"/>
+    <link rel="shortcut icon" href="../images/radio.ico"/>
+    <link rel="stylesheet" href="../common/layui/css/layui.css" type="text/css">
+    <style type="text/css">
+        .content {
+            opacity : 0.3;
+            filter:Alpha(opacity = 30)
+        }
+        .div-bor{
+            z-index: 5;position: relative;width: 200px;
+            top: 300px;
+            left: 38%;
+        }
+        .icon-user, .icon-pwd{
+            position: absolute;left: 10px;z-index:5;
+            background-image: url("../images/user.png"); /*引入图片图片*/
+            background-repeat: no-repeat; /*设置图片不重复*/
+            width: 20px;
+            height: 20px;
+            top: 10px;
+        }
+        .header {
+            position: absolute;
+            opacity: 0.3;
+            filter: Alpha(opacity = 30);
+        }
+        .icon-pwd {
+            background-image: url("../images/user.png");
+        }
+        .user, .pwd {
+            width: 300px;
+            height: 36px;
+            border-radius: 12px;
+            border: 0px;
+            top: 200px; left: 36%;
+            padding-left: 40px;
+            color: #DBD1DC;
+        }
+        ::-webkit-input-placeholder {
+            color: #DBD1DC;
+        }
+    </style>
 </head>
 <body>
-    <h2 style="text-align:center;color:red;">测试登录</h2>
+    <div class="header" style="width: 132px;height: 86px;border: 2px solid white;">
+
+    </div>
+    <div class="div-bor">
+        <i class="icon-user"></i>
+        <input type="text" class="user" placeholder="用户名">
+    </div>
+    <div class="div-bor" style="margin-top: 18px;">
+        <i class="icon-pwd"></i>
+        <input type="password" class="pwd" placeholder="密码">
+    </div>
+    <div class="content" style="width: 44%;height: 366px;background-color: white;margin: 6% 0 0 28%;border-radius: 36px;">
+    </div>
 </body>
+    <script type="text/javascript" src="../common/layui/layui.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.min.js"></script>
+    <script type="text/javascript">
+        window.onload = () => {
+            $('body').css('background-image', "url('../images/loginBg.jpg')");
+        };
+    </script>
 </html>

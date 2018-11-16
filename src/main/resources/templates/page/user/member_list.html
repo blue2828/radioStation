@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户列表</title>
+    <link rel="shortcut icon" href="../images/stephy.ico"/>
+</head>
+<body>
+    <div class="layui-inline" style="margin:5px 0 0 5px;">
+        <button id="openFrame_btn" class="layui-btn layui-btn-normal" type="button"><i class="layui-icon">&#xe67c;</i>上传</button>
+    </div>
+    <table class="layui-table" lay-filter="tab_filter" id="lay_tb"></table>
+    <div id="tb" style="display:none;">
+        <button type="button" lay-event="remove"  class="layui-btn layui-btn-danger layui-btn-mini"><i class="layui-icon">&#xe640;</i><span>删除</span></button>
+        <button type="button" lay-event="download"  class="layui-btn layui-btn-normal layui-btn-mini"><i class="layui-icon">&#xe601;</i><span>下载</span></button>
+    </div>
+    <div id="uploadFrame" style="display:none;">
+        <div class="layui-upload">
+            <button class="layui-btn layui-btn-normal" type="button"><i class="layui-icon">&#xe67c;</i>上传图片</button>
+            <div class="layui-upload-list">
+                <img style="width:260px;height:200px;border:1px solid #C0C0C0;" id="up_img" class="layui-upload-img">
+                <p id="errText"></p>
+            </div>
+        </div>
+    </div>
+    <link rel="stylesheet" href="../../common/layui/css/layui.css" media="all">
+    <script type="text/javascript" src="../../common/layui/layui.js" ></script>
+    <script type="text/javascript" >
+    layui.use(['jquery','table','layer','element','upload'],function(){
+        var layer = layui.layer, $ = layui.jquery, table = layui.table, element = layui.element, upload = layui.upload;
+        var tbOp = table.render({
+            url:'../../getAllMember',
+            elem:"#lay_tb", 
+            height:400, 
+            cols:[[
+                {field:'cb', checkbox:true},
+                {field:'userName', sort:true, align:'center', title:'用户名', width:180},
+                {field:'birthday', align:'center', title:'出生日期', width:180},
+                {field:'sex', align:'center', title:'性别', width:100},
+                {field:'phone', align:'center', title:'联系电话', width:180},
+                {field:'email', align:'center', title:'邮箱', width:180},
+                {field:'nickName', align:'center', title:'昵称', width:200},
+                {field:'label', align:'center', title:'个人标签', width:200},
+                {field:'roleId', align:'center', title:'权限等级', width:180},
+                {field:'op', align:'center', title:'操作', width:180, toolbar:'#tb'}
+                ]], 
+            page:true
+        });
+        table.on("tool(tab_filter)", function(obj){
+            var event = obj.event;
+            var data = obj.data;
+            if(event == 'remove'){
+                layer.confirm('是否要删除？', {icon:3, title:'系统提示'}, function(index){
+                    $.post('../delFile', {'id':data.id}, function(res){
+                        if(res.success) {
+                            layer.msg('删除成功');
+                            layer.close(index);
+                            tbOp.reload({
+                                url:"../getAllFiles"
+                            });
+                        }
+                        else{
+                            layer.msg(res.msg, {icon:5, time:800});
+                            layer.close(index);
+                            tbOp.reload({
+                                url:"../getAllFiles"
+                            });
+                        }
+                    }, 'json');
+                });
+            }
+        });
+        $('#openFrame_btn').click(function(){
+            layer.open({
+                content:$('#uploadFrame'), 
+                type:1, 
+                area:['400px', '400px']
+            });
+        });
+    });
+</script>
+</body>
+</html>
