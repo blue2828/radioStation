@@ -5,7 +5,7 @@ import java.util.Date;
 public class Member implements java.io.Serializable{
     private int id, sex, roleId;
     private String userName, pwd, phone, email, imageHeaderAddr, nickName, label;
-    private Date birthday;
+    private Date birthday, lastTimeLogin;
 
     public int getId() {
         return id;
@@ -98,7 +98,11 @@ public class Member implements java.io.Serializable{
     public Member() {
     }
 
-    public Member(int sex, int roleId, String userName, String pwd, String phone, String email, String imageHeaderAddr, String nickName, String label, Date birthday) {
+    public Member(int id) {
+        this.id = id;
+    }
+
+    public Member(int sex, int roleId, String userName, String pwd, String phone, String email, String imageHeaderAddr, String nickName, String label, Date birthday, Date lastTimeLogin) {
         this.sex = sex;
         this.roleId = roleId;
         this.userName = userName;
@@ -109,5 +113,14 @@ public class Member implements java.io.Serializable{
         this.nickName = nickName;
         this.label = label;
         this.birthday = birthday;
+        this.lastTimeLogin = lastTimeLogin;
+    }
+
+    public Date getLastTimeLogin() {
+        return lastTimeLogin;
+    }
+
+    public void setLastTimeLogin(Date lastTimeLogin) {
+        this.lastTimeLogin = lastTimeLogin;
     }
 }

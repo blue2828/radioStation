@@ -25,20 +25,17 @@
         }
         .header {
             position: absolute;
-            opacity : 0.3;
-            filter: Alpha(opacity = 30);
             border-radius: 50%;
             top: 116px;
             left: 45.5%;
-        }
-        .icon-pwd {
-            background-image: url("../images/user.png");
+            z-index: 15;
+            overflow: hidden;
         }
         .user, .pwd {
             width: 200px;
             height: 36px;
             border-radius: 12px;
-            border: 0px;
+            border: 0;
             top: 200px; left: 36%;
             padding-left: 40px;
             color: #DBD1DC;
@@ -46,28 +43,130 @@
         ::-webkit-input-placeholder {
             color: #DBD1DC;
         }
+        ::-moz-placeholder {
+            color: #DBD1DC;
+        }
+        :-moz-placeholder {
+            color: #DBD1DC;
+        }
+        :-ms-input-placeholder {
+            color: #DBD1DC;
+        }
+        .btn_name {
+            color: white;
+            font-size: 18px;
+            letter-spacing: 10px;
+            margin-top: 5%;
+            background-color: #BA31E1;
+            border: 0;
+            cursor: pointer;
+        }
+        .login_field {
+            opacity: 1;
+            filter: Alpha(opacity = 100);
+        }
     </style>
 </head>
-<body>
+<body style="background-image: url('../images/loginBg.jpg')">
     <div class="header" style="width: 100px;height: 100px;border: 2px solid #E3CFEB;">
-
+        <img style="margin:1px;width: 98px;height: 98px;border: 0;border-radius: 50%;z-index: 15;" src="../images/manHeader.jpg" onerror="imgErr()">
     </div>
-    <div class="div-bor">
-        <i class="icon-user"></i>
-        <input type="text" class="user" placeholder="用户名">
-    </div>
-    <div class="div-bor" style="margin-top: 18px;">
-        <i class="icon-pwd"></i>
-        <input type="password" class="pwd" placeholder="密码">
-    </div>
-    <div class="content" style="width: 344px;height: 300px;background-color: white;margin: 6% 0 0 37%;border-radius: 36px;">
-    </div>
+    <form class="layui-form" lay-filter="fm">
+        <div class="div-bor">
+            <i class="icon-user"></i>
+            <input type="text" name="id" class="user" placeholder="用户名">
+        </div>
+        <div class="div-bor" style="margin-top: 18px;">
+            <i class="icon-pwd" style="background-image: url('../images/pwd.png');"></i>
+            <input type="password" name="pwd" class="pwd" placeholder="密码">
+        </div>
+        <div class="content" style="width: 344px;height: 300px;background-color: white;margin: 6% 0 0 37%;border-radius: 36px;">
+            <div style="height: 240px;"></div>
+            <div class="login_field" lay-submit lay-filter="btn_submit" style="cursor: pointer;text-align: center;height: 60px;width: inherit;background-color: #BA31E1;border-bottom-left-radius: 36px;border-bottom-right-radius: 36px;"><button type="button" class="btn_name">登录</button></div>
+        </div>
+    </form>
+    <input type="hidden" class="checkSuccess">
 </body>
     <script type="text/javascript" src="../common/layui/layui.js"></script>
-    <script type="text/javascript" src="../common/js/jquery.min.js"></script>
     <script type="text/javascript">
-        window.onload = () => {
-            $('body').css('background-image', "url('../images/loginBg.jpg')");
-        };
+
+        layui.use(['form', 'layer', 'jquery', 'element'], () => {
+            var form = layui.form, $ = layui.jquery, layer = layui.layer,  element = layui.element;
+            $('input').each((index, value) => {
+                $(value).mousedown(() => {
+                    $(value).css('border', "1px solid #A2D3FF");
+                });
+                $(value).blur(() => {
+                    $(value).css('border', "0");
+                    if ($(value).hasClass("user")) {
+                        let memberId = $('.user').val();
+                        if (memberId == '') {
+                            $('img').attr('src', '../images/manHeader.jpg');
+                            return;
+                        }else
+                            memberInfo(memberId, false);
+
+                    }
+                });
+            });
+            window.imgErr = function () {
+                var memberId = $('.user').val();
+                if (memberId == undefined || memberId == '' || memberId == null)
+                    $('img').attr('src', '../images/manHeader.jpg');
+                else {
+                    var sex = memberInfo(memberId, true)[0];
+                    switch (sex) {
+                        case 0 :
+                            $('img').attr('src', '../images/manHeader.jpg');
+                            break;
+                        case 1 :
+                            $('img').attr('src', '../images/wmHeader.jpg');
+                            break;
+                        default :
+                            $('img').attr('src', '../images/manHeader.jpg');
+                    }
+                }
+            }
+            var memberInfo = function (memberId, flag) {
+                var ob = [];
+                if (flag) {
+                    $.get('../getMemberInfo', {'memberId' : memberId, page : 1, limit : 30}, (res) => {
+                        ob.push(res.data[0].sex);
+                    }, 'json');
+                }else
+                    ob.push(undefined);
+                $.get('../getMemberImg', {'memberId' : memberId}, (res, status, xhr) => {
+                    $('img').attr('src', 'data:image/png;base64,' + res);
+                    $('.checkSuccess').val('success');
+                }, 'json');
+                setTimeout(() => {
+                    let flag = $('.checkSuccess').val();
+                    if (!flag)
+                        $('img').attr('src', '../images/manHeader.jpg');
+                    $('.checkSuccess').val('');
+                }, '80');
+                var returnArg = ob.join(',');
+                return returnArg;
+            }
+            form.on('submit(btn_submit)', function (data) {
+                $.ajax({
+                    url : '../checkLogin',
+                    data : data.field,
+                    dataType : 'json',
+                    success : (res, state, xhr) => {
+                        if (res.success) {
+                            let loadingLayer = layer.load(1);
+                            setTimeout(() => {
+                                location.href = 'index.html?memberId=' + data.field.id;
+                                layer.close(loadingLayer);
+                            }, '500');
+                        }else {
+                            layer.msg(res.errMsg, {icon : 5});
+                        }
+                    }
+                });
+            });
+        });
+
     </script>
 </html>

@@ -25,4 +25,29 @@ public class MemberDaoImpl implements IMemberDao {
     public int countMember(Page page, Member member) {
         return memberDao.countMember(page, member);
     }
+
+    @Override
+    public String getImageHeader(int memberId) {
+        return memberDao.getImageHeader(memberId);
+    }
+
+    @Override
+    public Member checkMember(Member member) {
+        return memberDao.checkMember(member);
+    }
+
+    @Override
+    public void editMember(Member member, String str) {
+        memberDao.editMember(member, str);
+    }
+
+    @Override
+    public void refreshDate(String lastLoginTime, int id) {
+        memberDao.refreshDate(lastLoginTime, id);
+    }
+
+    @Override
+    public void delMember(int id) {
+        memberDao.delMember(id);
+    }
 }

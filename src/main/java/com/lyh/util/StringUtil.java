@@ -7,14 +7,17 @@ import com.lyh.entity.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 public class StringUtil {
 
     public static boolean isEmpty(String str){
-        if(str==null||"".equals(str))return true;
-        else return false;
+        if(str==null||"".equals(str))
+            return true;
+        else
+            return false;
     }
 
     public JSONArray formatListToJson (List<?> list) {
@@ -41,6 +44,8 @@ public class StringUtil {
                             tempJb.put("uploadDate", this.formatTime(((UserFile) list.get(i)).getUploadDate(), "yyyy-MM-dd HH:mm:ss"));
                         else if (fieldName.equals("roleId") && (list.get(i).getClass() == Member.class))
                             tempJb.put("roleId", EnumUtil.formatIntRoleToStr(((Member) list.get(i)).getRoleId()));
+                        else if (fieldName.equals("type"))
+                            tempJb.put("type", EnumUtil.formatIntTypeToStr(((UserFile) list.get(i)).getType()));
                             else
                                 tempJb.put(fieldName, this.getFieldValueByName(fieldName, list.get(i)));
                 }
@@ -84,5 +89,11 @@ public class StringUtil {
             e.printStackTrace();
         }
         return value;
+    }
+    public String getCurrentTimeStr () {
+        String str = null;
+        Calendar calendar = Calendar.getInstance();
+        str = "" + calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + " " + calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND);
+        return str;
     }
 }

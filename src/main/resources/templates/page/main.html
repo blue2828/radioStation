@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <link rel="shortcut icon" href="../images/radio.ico"/>
+    <style>
+        .layui-elem-field {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <img style="width: 150px;height: 150px;border: 6px solid #44576B;border-radius: 50%;margin-left: 43%;" src="" class="imgHeader">
+    <fieldset class="layui-elem-field">
+        <legend>登录信息</legend>
+        <div class="layui-field-box">
+            <fieldset class="layui-elem-field">
+                <legend>姓名</legend>
+                <div class="layui-field-box memberName"></div>
+            </fieldset>
+            <fieldset class="layui-elem-field">
+                <legend>性别</legend>
+                <div class="layui-field-box sex"></div>
+            </fieldset>
+            <fieldset class="layui-elem-field">
+                <legend>身份</legend>
+                <div class="layui-field-box degree"></div>
+            </fieldset>
+            <fieldset class="layui-elem-field">
+                <legend>登录时间</legend>
+                <div class="layui-field-box lastTimeLogin"></div>
+            </fieldset>
+        </div>
+    </fieldset>
+</body>
+    <script type="text/javascript" src="../common/js/jquery.min.js"></script>
+    <script>
+        $.get('../getCurrentMember', (res) => {
+            var currentMember = res.currentMember;
+            $.get('../getMemberImg', {'memberId' : currentMember[0].id}, (res, status, xhr) => {
+                $('.imgHeader').attr('src', 'data:image/png;base64,' + res);
+            }, 'json');
+            $('.memberName').text(currentMember[0].userName);
+            $('.sex').text(currentMember[0].sex == 0 ? "男" : "女");
+            $('.degree').text(currentMember[0].roleId == 0 ? '用户' : currentMember.roleId == 1  ? '主播' : '管理员');
+            $('.lastTimeLogin').text(res.lastTimeLogin);
+        }, 'json');
+    </script>
+</html>

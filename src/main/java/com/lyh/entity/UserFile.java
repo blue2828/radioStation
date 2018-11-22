@@ -65,4 +65,8 @@ public class UserFile implements java.io.Serializable {
 
     public UserFile() {
     }
+
+    public UserFile(int id) {
+        this.id = id;
+    }
 }

@@ -11,5 +11,5 @@ $.ajaxSetup({
 
 function sessionTimeOut() {
     layer.msg("登录会话超时，请重新登录后操作", {icon: 5});
-    setTimeout('window.top.location.href = "login.html"', 2000);
+    setTimeout('window.top.location.href = "/page/login.html"', 2000);
 }

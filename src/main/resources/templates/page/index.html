@@ -11,7 +11,7 @@
         <div class="layui-logo"><span style="color: white;font-size:20px;">学院电台后台</span></div>
         <ul class="layui-nav layui-layout-left" kit-navbar>
             <li class="layui-nav-item">
-                <a href="#" kit-target data-options="{url:'pageController_welcome_main',icon:'&#xe68e',title:'首页',id:12}"><i
+                <a href="#" kit-target data-options="{url:'main.html',icon:'&#xe68e',title:'首页',id:12}"><i
                         class="layui-icon">&#xe68e;</i><span>首页</span></a>
             </li>
             <li class="layui-nav-item">
@@ -35,7 +35,7 @@
                 </dl>
             </li>
             <li class="layui-nav-item">
-                <a href="userAction_logout"><span>登出</span><i class="layui-icon">&#xe602;</i></a>
+                <a href="javascript:void(0)" class="logout"><span>登出</span><i class="layui-icon">&#xe602;</i></a>
             </li>
         </ul>
     </div>
@@ -62,8 +62,8 @@
                             </a>
                         </dd>
                         <dd id="103">
-                            <a href="#" kit-target id="baomiLi" data-options="{id:4,title:'文件管理',icon:'&#xe653',url:'pageController_menu_menuManage'}">
-                                <i class="layui-icon">&#xe653;</i><span> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;文件管理</span>
+                            <a href="#" kit-target id="baomiLi" data-options="{id:4,title:'文件管理',icon:'&#xe653',url:'file/file_list.html'}">
+                                <i class="layui-icon">&#xe621;</i><span> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;文件管理</span>
                             </a>
                         </dd>
                     </dl>
@@ -156,11 +156,10 @@
     </form>
 </div>
 </body>
+    <script type="text/javascript" src="../common/js/jquery.min.js"></script>
     <link rel="stylesheet" href="../common/layui/css/layui.css" type="text/css">
     <link rel="stylesheet" href="../common/layui/css/app.css" type="text/css">
     <script type="text/javascript" src="../common/layui/layui.js"></script>
-    <script type="text/javascript" src="../common/js/jquery.min.js"></script>
-    <script type="text/javascript" src="../common/js/publicSetup.js"></script>
     <script type="text/javascript">
         layui.config({
             base: '../common/build/js/'
@@ -173,26 +172,41 @@
         layui.use(['layer', 'jquery', 'laydate', 'form', 'upload', 'element'], function () {
             var layer = layui.layer, $ = layui.jquery, laydate = layui.laydate, form = layui.form,
                 upload = layui.upload, element = layui.element;
-            $.post('userAction_getCurrentUser',function(result){
-                var currentUser = result.data[0];
-                $('.userName').text(currentUser.fullname);
-                $('#welWord').text("欢迎您！" + currentUser.fullname + (currentUser.sex == 1 ? '女士' : '先生'));
-                $("input[name='user.userid']").val(currentUser.userid);
-                $('#sex').val(currentUser.sex);
-                $('#fullname').val(currentUser.fullname);
-                $('#email').val(currentUser.email);
+            var url = location.href;
+            var args = url.split('?');
+            var memberId = args[1].substring(args[1].indexOf("=") + 1);
+            if (memberId.indexOf("#") != -1)
+                memberId = memberId.substring(0, memberId.length - 1);
+            $('.logout').click(() => {
+                location.href = '../logout?memberId=' + memberId;
+            });
+            window.onload = () => {
+                $.get('../refreshLoginTime', {"time" : new Date()}, (res) => {
+                    if (res.errMsg) {
+                       layer.alert(res.complete + "，正在跳转到登录页面......");
+                        setTimeout(() => {
+                            layer.closeAll();
+                            window.top.location.href = "login.html";
+                        }, '800');
+
+                    }
+                }, 'json');
+            };
+            $.post('../getMemberInfo', {'id' : memberId}, function(result){
+                var currentUser = result;
+                $('.userName').text(currentUser.data[0].userName);
+                $('#welWord').text("欢迎您！" + currentUser.data[0].userName + (currentUser.data[0].sex == '男' ? '先生' : '女士'));
+                $("input[name='user.userid']").val(currentUser.data[0].id);
+                $('#sex').val(currentUser.data[0].sex);
+                $('#fullname').val(currentUser.data[0].userName);
+                $('#email').val(currentUser.data[0].email);
                 form.render("select", 'fm');
-               /* $.post('systemAction_getAllMenus', function(data) {
-                    $.each(data.data, function(key, value) {
-                        var role_id = value.role_id.split(",");
-                        $.inArray('' + currentUser.role_id, role_id) >= 0 ? $('#' + value.menu_no).removeClass("layui-hide") :
-                            undefined;
-                    });
-                }, 'json');*/
             }, 'json');
-            document.getElementById("littleImg").src = 'userAction_getImageHeader?version=Math.ramdom()*' + new Date();
-            document.getElementById("bigImg").src = 'userAction_getImageHeader?version=Math.random()*' + new Date();
-            document.getElementById("memberImg").src = 'userAction_getImageHeader?version=Math.random()*' + new Date();
+            $.get('../../getMemberImg', {'memberId' : memberId}, (res, status, xhr) => {
+                $("#littleImg").attr('src', 'data:image/png;base64,' + res);
+                $("#bigImg").attr('src', 'data:image/png;base64,' + res);
+                $("#memberImg").attr('src', 'data:image/png;base64,' + res);
+            }, 'json');
             var cleanForm = function(formId) {
                 switch (formId) {
                     case 'fm2':

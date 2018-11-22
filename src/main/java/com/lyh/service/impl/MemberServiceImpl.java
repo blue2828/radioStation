@@ -52,4 +52,65 @@ public class MemberServiceImpl implements IMemberService {
         }
         return num;
     }
+
+    @Override
+    public String getImageHeader(int memberId) {
+        String imgAddr = "";
+        try {
+            imgAddr = memberDao.getImageHeader(memberId);
+        }catch (Exception e) {
+            e.printStackTrace();
+            imgAddr = "";
+        }
+        return imgAddr;
+    }
+
+    @Override
+    public Member checkMember(Member member) {
+        Member mem = null;
+        try {
+            mem = memberDao.checkMember(member);
+        }catch (Exception e) {
+            mem = null;
+            e.printStackTrace();
+        }
+        return mem;
+    }
+
+    @Override
+    @Transactional
+    public int editMember(Member member, String date) {
+        int flag = 0;
+        try {
+            memberDao.editMember(member, date);
+            flag = 1;
+        }catch (Exception e) {
+            e.printStackTrace();
+            flag = 0;
+        }
+        return flag;
+    }
+
+    @Override
+    public void refreshDate(String lastLoginTime, int id) {
+        try {
+            memberDao.refreshDate(lastLoginTime, id);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    @Transactional
+    public int delMember(int id) {
+        int flag = 0;
+        try {
+            memberDao.delMember(id);
+            flag = 1;
+        }catch (Exception e) {
+            e.printStackTrace();
+            flag = 0;
+        }
+        return flag;
+    }
 }

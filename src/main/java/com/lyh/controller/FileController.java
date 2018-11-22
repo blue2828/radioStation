@@ -1,27 +1,44 @@
 package com.lyh.controller;
 
-import com.lyh.entity.File;
+import com.lyh.entity.Page;
+import com.lyh.entity.UserFile;
 import com.lyh.service.IFileService;
+import com.lyh.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController
+@Controller
 public class FileController {
     @Autowired
-    @Qualifier("fileServiceImpl")
+    @Qualifier("fileService")
     private IFileService fileServiceImpl;
     @RequestMapping("/getAllFiles")
-    public Map<String, Object> getAllFiles(){
-        List<Map<String, Object>> list = fileServiceImpl.getAllFiles();
+    @ResponseBody
+    /**
+     * selectVersion 0:默认查询全部；1:条件查
+     */
+    public Map<String, Object> getAllFiles(UserFile userFile, Page page, int selectVersion){
+        switch (selectVersion) {
+            case 0 :
+                userFile.setId(-1);
+                userFile.setType(-1);
+                userFile.setUploadMemId(-1);
+                break;
+        }
+        List<UserFile> list = fileServiceImpl.getAllFiles(userFile, page);
         Map<String, Object> result = new HashMap<String, Object>();
-        result.put("data", list);
+        result.put("data", new StringUtil().formatListToJson(list));
         result.put("count", list.size());
         result.put("msg", "");
         result.put("code", 0);
@@ -30,7 +47,11 @@ public class FileController {
     @RequestMapping("/delFile")
     public Map<String, Object> delFile (int id){
         Map<String, Object> result = new HashMap<String, Object>();
-        String fileName = fileServiceImpl.queryFileName(id);
+        UserFile userFile = new UserFile();
+        userFile.setType(-1);
+        userFile.setUploadMemId(-1);
+        userFile.setId(id);
+        String fileName = fileServiceImpl.getAllFiles(userFile, new Page(1, 30)).get(0).getFileName();
         boolean delFlag = fileServiceImpl.delFile(id);
         java.io.File file = new java.io.File(fileName);
         if(delFlag){
@@ -79,5 +100,42 @@ public class FileController {
             }
         }
         return result;
+    }
+    @RequestMapping("/previewPdf")
+    public void previewDoc (HttpServletRequest request, Map<String, Object> map, HttpServletResponse response) {
+        BufferedInputStream bufferedInputStream = null;
+        FileInputStream inputStream = null;
+        BufferedOutputStream outputStream = null;
+        OutputStream out = null;
+        response.setHeader("Content-Disposition", "attachment;fileName=test.pdf");
+        response.setContentType("multipart/form-data");
+        try {
+            out = response.getOutputStream();
+            inputStream = new FileInputStream(new File("d:/test.pdf"));
+            bufferedInputStream = new BufferedInputStream((inputStream));
+            outputStream = new BufferedOutputStream(out);
+            int temp = 0;
+            byte[] buffer = new byte[1024];
+            while ((temp = bufferedInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, temp);
+                outputStream.flush();
+            }
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if (null != bufferedInputStream)
+                    bufferedInputStream.close();
+                if (null != inputStream)
+                    inputStream.close();
+                if(null != out)
+                    out.close();
+                if (null != outputStream)
+                    outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

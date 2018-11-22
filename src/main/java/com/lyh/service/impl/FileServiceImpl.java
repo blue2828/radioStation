@@ -1,6 +1,8 @@
 package com.lyh.service.impl;
 
 import com.lyh.dao.IFileDao;
+import com.lyh.entity.Page;
+import com.lyh.entity.UserFile;
 import com.lyh.service.IFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -10,15 +12,16 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-@Service
+@Service("fileService")
 public class FileServiceImpl implements IFileService {
     @Autowired
-    @Qualifier("fileDaoImpl")
+    @Qualifier("fileDao")
     private IFileDao fileDao;
-    public List<Map<String, Object>> getAllFiles(){
-        List<Map<String, Object>> mapList = null;
+    @Override
+    public List<UserFile> getAllFiles(UserFile userFile, Page page){
+        List<UserFile> mapList = null;
         try{
-            mapList = fileDao.getAllFiles();
+            mapList = fileDao.getAllFiles(userFile, page);
         }catch (Exception e){
             e.printStackTrace();
             mapList = null;
@@ -41,16 +44,5 @@ public class FileServiceImpl implements IFileService {
         return isSuccess;
     }
 
-    @Override
-    public String queryFileName(int id) {
-        String str = "";
-        try{
-            str = fileDao.queryFileName(id);
-        }catch (Exception e){
-            str = "";
-            e.printStackTrace();
-        }
-        return str;
-    }
 
 }
