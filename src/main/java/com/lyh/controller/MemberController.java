@@ -28,15 +28,12 @@ public class MemberController {
     @Autowired
     @Qualifier("memberService")
     private IMemberService memberService;
-    public void setUserService(IMemberService memberService) {
-        this.memberService = memberService;
-    }
 
     @RequestMapping("/checkLogin")
     @ResponseBody
     public Map<String, Object> checkLogin (Member member, HttpSession session) {
         Map<String, Object> map = new HashMap<String, Object>();
-        Member result = memberService.checkMember(member);
+        Member result = memberService.checkMember(member, false);
          if (result.getRoleId() != 2) {
             map.put("success", false);
             map.put("errMsg", "非管理员不能登录");
@@ -233,41 +230,5 @@ public class MemberController {
             map.put("errMsg", "删除失败，失败条数：" + list.size() + "，删除失败的用户编号：" + items);
         }
         return map;
-    }
-    @RequestMapping("/getPdf")
-    public String getPdfSrc () {
-        String base24Str = null;
-        BufferedInputStream bufferedInputStream = null;
-        FileInputStream inputStream = null;
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] result = null;
-        try {
-            inputStream = new FileInputStream(new File("d:/test.pdf"));
-            bufferedInputStream = new BufferedInputStream((inputStream));
-            int temp = 0;
-            byte[] buffer = new byte[1024];
-            while ((temp = bufferedInputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, temp);
-                outputStream.flush();
-            }
-            result = outputStream.toByteArray();
-            base24Str = JSON.toJSONString(result);
-        }catch(FileNotFoundException e) {
-            e.printStackTrace();
-        }catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            try {
-                if (null != bufferedInputStream)
-                    bufferedInputStream.close();
-                if (null != inputStream)
-                    inputStream.close();
-                if (null != outputStream)
-                    outputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return base24Str;
     }
 }

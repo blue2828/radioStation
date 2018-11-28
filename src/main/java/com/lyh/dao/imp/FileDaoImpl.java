@@ -20,12 +20,13 @@ public class FileDaoImpl implements IFileDao {
     }
 
     @Override
+    public int countFile(UserFile userFile, Page page) {
+        return fileDao.countFile(userFile, page);
+    }
+
+    @Override
     public boolean delFile(int id) {
-        /*String sql = "delete from t_file where id  =  ? ";
-        int num = jdbcTemplate.update(sql, id);
-        if(num>0) return true;
-        else return false;*/
-        return false;
+        return fileDao.delFile(id);
     }
 
 

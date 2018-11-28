@@ -4,12 +4,16 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lyh.entity.*;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 public class StringUtil {
 
@@ -93,7 +97,38 @@ public class StringUtil {
     public String getCurrentTimeStr () {
         String str = null;
         Calendar calendar = Calendar.getInstance();
-        str = "" + calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + " " + calendar.get(Calendar.HOUR) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND);
+        str = "" + calendar.get(Calendar.YEAR) + "-" + (calendar.get(Calendar.MONTH) + 1) + "-" + calendar.get(Calendar.DATE) + " " + calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE) + ":" + calendar.get(Calendar.SECOND);
         return str;
     }
+    public String getImgResolution (File file) {
+        String str = null;
+        BufferedImage bufferedImage = null;
+        try {
+            bufferedImage = ImageIO.read(file);
+            str = bufferedImage.getWidth() + "*" + bufferedImage.getHeight();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return str;
+    }
+
+    public String trimRight (String arg) {
+        String str = "";
+        if (arg.matches("^[\\t\\n\\r\\s]")) {
+            str = arg.substring(0, arg.indexOf(arg.trim().substring(0, 1)) + arg.trim().length());
+        }else
+            str = arg.trim();
+        return str;
+    }
+    public String getRandomStr () {
+        String result = "";
+        String willSelected = "随意搞几个就行了，哈哈";
+        char[] chars = willSelected.toCharArray();
+        Random random = new Random();
+        for (int i = 0; i < 4; i ++) {
+            result += willSelected.charAt(random.nextInt(chars.length));
+        }
+        return result;
+    }
+
 }

@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Member implements java.io.Serializable{
     private int id, sex, roleId;
-    private String userName, pwd, phone, email, imageHeaderAddr, nickName, label;
+    private String userName, pwd, phone, email, imageHeaderAddr, nickName, label, openid, session_key, wechatNo;
     private Date birthday, lastTimeLogin;
 
     public int getId() {
@@ -95,6 +95,22 @@ public class Member implements java.io.Serializable{
         this.birthday = birthday;
     }
 
+    public String getOpenid() {
+        return openid;
+    }
+
+    public void setOpenid(String openid) {
+        this.openid = openid;
+    }
+
+    public String getSession_key() {
+        return session_key;
+    }
+
+    public void setSession_key(String session_key) {
+        this.session_key = session_key;
+    }
+
     public Member() {
     }
 
@@ -116,11 +132,41 @@ public class Member implements java.io.Serializable{
         this.lastTimeLogin = lastTimeLogin;
     }
 
+    public Member(int sex, int roleId, String userName, String pwd, String phone, String email, String imageHeaderAddr, String nickName, String label, String openid, String session_key, Date birthday, Date lastTimeLogin, String wechatNo) {
+        this.sex = sex;
+        this.roleId = roleId;
+        this.userName = userName;
+        this.pwd = pwd;
+        this.phone = phone;
+        this.email = email;
+        this.imageHeaderAddr = imageHeaderAddr;
+        this.nickName = nickName;
+        this.label = label;
+        this.openid = openid;
+        this.session_key = session_key;
+        this.birthday = birthday;
+        this.lastTimeLogin = lastTimeLogin;
+        this.wechatNo = wechatNo;
+    }
+
+    public Member(String openid, String session_key) {
+        this.openid = openid;
+        this.session_key = session_key;
+    }
+
     public Date getLastTimeLogin() {
         return lastTimeLogin;
     }
 
     public void setLastTimeLogin(Date lastTimeLogin) {
         this.lastTimeLogin = lastTimeLogin;
+    }
+
+    public String getWechatNo() {
+        return wechatNo;
+    }
+
+    public void setWechatNo(String wechatNo) {
+        this.wechatNo = wechatNo;
     }
 }

@@ -8,8 +8,8 @@ import java.util.List;
 
 @Mapper
 public interface IMemberDao {
-    @Insert("insert into member values (null, #{member.userName}, #{member.pwd}, #{member.birthday}, #{member.sex}, #{member.phone}," +
-            " #{member.email}, #{member.imageHeaderAddr}, #{member.nickName}, #{member.label}, #{member.roleId}), null")
+    @Insert("insert into member values (#{member.id}, #{member.userName}, #{member.pwd}, #{member.birthday}, #{member.sex}, #{member.phone}," +
+            " #{member.email}, #{member.imageHeaderAddr}, #{member.nickName}, #{member.label}, #{member.roleId}, null, #{member.openid}, #{member.session_key}, #{member.wechatNo})")
     int insertUser (@Param("member") Member member);
     @Select("<script>select * from member where 1 = 1 <if test=\"member.userName != null\">and userName like " +
             "concat('%', #{member.userName}, '%')</if>" +
@@ -23,8 +23,9 @@ public interface IMemberDao {
     int countMember (@Param("page") Page page, @Param("member")Member member);
     @Select("select imageHeaderAddr from member where id = #{memberId} ")
     String getImageHeader (@Param("memberId") int memberId);
-    @Select("select * from member where id = #{member.id} and pwd = #{member.pwd}")
-    Member checkMember (@Param("member") Member member);
+    @Select("<script><if test=\"isWx == true\"> select * from member where openid = #{member.openid}</if>" +
+            "<if test=\"isWx == false\"> select * from member where id = #{member.id} and pwd = #{member.pwd}</if></script>")
+    Member checkMember (@Param("member") Member member, @Param("isWx") boolean isWx);
     @Update("update member set userName = #{member.userName}, " +
             "pwd = #{member.pwd}, " +
             "birthday = #{member.birthday}, " +
@@ -35,10 +36,18 @@ public interface IMemberDao {
             "nickName = #{member.nickName}, " +
             "label = #{member.label}, " +
             "roleId = #{member.roleId}, " +
-            "lastTimeLogin = #{date} where id = #{member.id} ")
+            "lastTimeLogin = #{date}, openid = #{member.openid}, session_key = #{member.session_key} where id = #{member.id} ")
     void editMember (@Param("member") Member member, @Param("date") String date);
     @Select("update Member set lastTimeLogin = #{lastTimeLogin} where id = #{id}")
     void refreshDate (@Param("lastTimeLogin") String lastTimeLogin, @Param("id") int id );
     @Delete("delete from Member where id = #{id}")
     void delMember (@Param("id") int id);
+    @Delete("update Member set sessionKey = NULL where id = #{id}")
+    void delSessionKey (@Param("id") int id);
+    @Select("SELECT MAX(id) FROM member")
+    int selectMaxId ();
+    @Select("select * from memeber where session_key = #{member.session_key}")
+    Member selectMemberByKey (@Param("member") Member member);
+    @Update("update Member set session_key = #{member.session_key} where id = #{member.id}")
+    void refreshKey (@Param("member") Member member);
 }

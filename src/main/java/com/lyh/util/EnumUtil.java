@@ -20,6 +20,8 @@ public class EnumUtil {
                 break;
             case 1 : str = "文章";
                 break;
+            case 2 : str = "图片";
+                break;
         }
         return str;
     }

@@ -11,8 +11,12 @@ public interface IMemberService {
     List<Member> queryMemberAllOrSth (Page page, Member member);
     int countMember (Page page, Member member);
     String getImageHeader (int memberId);
-    Member checkMember (Member member);
+    Member checkMember (Member member, boolean isWx);
     int editMember(Member member, String date);
     void refreshDate(String lastLoginTime, int id);
     int delMember (int id);
+    int delSessionKey (int id);
+    int selectMaxId();
+    public Member selectMemberByKey(Member member);
+    public int refreshKey(Member member);
 }

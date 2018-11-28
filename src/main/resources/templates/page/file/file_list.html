@@ -9,32 +9,31 @@
             height: 100%;
             max-width: 100%;
         }
+        .laytable-cell-0-view{
+            height: 100%;
+            h: 100%;
+        }
     </style>
 </head>
 <body>
-    <div class="layui-inline" style="margin:5px 0 0 5px;">
-        <button id="openFrame_btn" class="layui-btn layui-btn-normal" type="button"><i class="layui-icon">&#xe67c;</i>上传</button>
-    </div>
     <table class="layui-table" lay-filter="tab_filter" id="lay_tb"></table>
     <div id="tb" style="display:none;">
         <button type="button" lay-event="remove"  class="layui-btn layui-btn-danger layui-btn-mini"><i class="layui-icon">&#xe640;</i><span>删除</span></button>
-        <button type="button" lay-event="download"  class="layui-btn layui-btn-normal layui-btn-mini"><i class="layui-icon">&#xe642;</i><span>编辑</span></button>
     </div>
-    <div id="uploadFrame" style="display:none;">
-        <div class="layui-upload">
-            <button class="layui-btn layui-btn-normal" type="button"><i class="layui-icon">&#xe67c;</i>上传图片</button>
-            <div class="layui-upload-list">
-                <img style="width:260px;height:200px;border:1px solid #C0C0C0;" id="up_img" class="layui-upload-img">
-                <p id="errText"></p>
-            </div>
-        </div>
+    <iframe style="display: none;" id="pdfIframe" ></iframe>
+    <img src="" id="previewImg" style="display: none;">
+    <div class="audio" style="position: absolute; left: 36%; top: 32%;display: none; ">
+        <div class="closeMusicBtn" style="background-color: #F1F3F4;cursor: pointer;width: 17px;height: 17px; margin-left: 92%;"><img width="16" height="16" src="../../images/closeBtn.png"></div>
+        <audio id="player" preload="auto" src="" controls="controls" autoplay />
+    </div>
+    <div class="prewViewTxt" style="display: none;">
+        <pre></pre>
     </div>
     <link rel="stylesheet" href="../../common/layui/css/layui.css" media="all">
     <script type="text/javascript" src="../../common/layui/layui.js" ></script>
     <script type="text/javascript" >
     layui.use(['table','layer','element','upload'],function(){
         var layer = layui.layer, $ = layui.jquery, table = layui.table, element = layui.element, upload = layui.upload;
-
         var tbOp = table.render({
             url: '../../getAllFiles?selectVersion=0',
             elem: "#lay_tb", 
@@ -49,31 +48,34 @@
                 {field: 'uploadDate', align: 'center', title: '上传时间', width: 180},
                 {field: 'storeAddr', sort: true, align: 'center', title: '存放地址', width: 180},
                 {field: 'fileDesc', align: 'center', title: '赠词', width: 180},
-                {field: 'op', align: 'center', title: '操作', width: 180, toolbar: '#tb'}
+                {field: 'op', align: 'center', title: '操作', width: 100, toolbar: '#tb'}
                 ]], 
             page: true,
             done: (res, page, count) => {
                 $("[data-field='view']").each((index, value) => {
-                    if (index == 0)
+                    if (index == 0) {
+                        $(value).html("<div style='width: 100px;'><img width=16 height='16' src='../../images/eye.png'>" + $(value).text() + "</div>");
                         return true;
+                    }
+                    $(value).css('cursor', 'pointer');
                     let storeAddr = $(value).next().next().next().text();
                     let fileType = storeAddr.substring(storeAddr.indexOf(".") + 1);
                     switch (fileType) {
                         case "pdf" :
-                            $(value).html("<img style='width: 100px;' onclick='preview(this)' src='../../images/pdf.jpeg' class='imgHeader'>");
+                            $(value).html("<img style='width: 100px;' title='点击可预览' onclick='preview(this)' src='../../images/pdf.jpeg' class='imgHeader'>");
                             break;
                         case "txt" :
-                            $(value).html("<img style='width: 100px;' onclick='preview(this)' src='../../images/txt.jpg' class='imgHeader'>");
+                            $(value).html("<img style='width: 100px;' title='点击可预览' onclick='preview(this)' src='../../images/txt.jpg' class='imgHeader'>");
                             break;
                         default :
                             let strFilter=".jpeg|.gif|.jpg|.png|.bmp|.pic|";
                             let arr = strFilter.split("|", 6);
                             $.each(arr, (item, itemValue) => {
                                 if ("." + fileType == itemValue) {
-                                    $(value).html("<img style='width: 100px;' onclick='preview(this)' src='../../images/pic.jpg' class='imgHeader'>");
+                                    $(value).html("<img style='width: 100px;' onclick='preview(this)' title='点击可预览' src='../../images/pic.jpg' class='imgHeader'>");
                                     return false;
                                 }else {
-                                    item == 5 ? $(value).html("<img style='width: 100px;' onclick='preview(this)' src='../../images/mp3.jpg' class='imgHeader'>") :
+                                    item == 5 ? $(value).html("<img style='width: 100px;' title='点击可预览' onclick='preview(this)' src='../../images/mp3.jpg' class='imgHeader'>") :
                                         undefined;
                                 }
                             });
@@ -82,27 +84,67 @@
                 });
             }
         });
-
+        $('.closeMusicBtn').mouseover(() => {
+            $('.closeMusicBtn').css('background', '#FF5722');
+            $('.closeMusicBtn').find('img:eq(0)').attr('src', '../../images/closeBtn_white.png');
+        });
+        $('.closeMusicBtn').mouseout(() => {
+            $('.closeMusicBtn').css('background', '#F1F3F4');
+            $('.closeMusicBtn').find('img:eq(0)').attr('src', '../../images/closeBtn.png');
+        });
+        $('.closeMusicBtn').click(() => {
+             $('.audio').css('display', 'none');
+             document.querySelector('#player').pause();
+        });
         window.preview = function (obj) {
                 let storeAddr = $(obj).parent().next().next().next().text();
                 let fileType = storeAddr.substring(storeAddr.indexOf(".") + 1);
                 switch (fileType) {
                     case "pdf" :
-                        openFrame("<iframe id=\"pdfIframe\" width=\"100%\" height=\"768\"></iframe>", [$(window).width() - 100 + 'px', $(window).height() - 50 + 'px']);
+                        $("#pdfIframe").css({
+                           "width" : $(window).width() - 110 + 'px',
+                            "height" : $(window).height() - 50 + 'px'
+                        });
+                        openFrame($("#pdfIframe"), [$(window).width() - 100 + 'px', $(window).height() - 50 + 'px'], $(obj).parent().prev().text() + '预览效果');
+                        $("#pdfIframe").attr("src","../../pdf/web/viewer.html?file="+ encodeURIComponent("../../previewFile?fileId=" + $(obj).parent().prev().prev().prev().text()));
                         break;
                     case "txt" :
-                        $(value).html("<img style='width: 100px;' src='../../images/txt.jpg' class='imgHeader'>");
+                        $.ajax({
+                            url: '../../previewFile',
+                            dataType: "text",
+                            data: {fileId: $(obj).parent().prev().prev().prev().text(), isTxt : true},
+                            contentType: "text/html;charset=utf-8",
+                            success : function(res) {
+                                /*var reg = /^[\t\n\r\s]/;
+                                if(reg.test(res)) {
+                                    res = res.substring(0, res.indexOf($.trim(res).substring(0, 1)) + $.trim(res).length);
+                                    alert(true);
+                                }*/
+                                $('.prewViewTxt').find('pre:eq(0)').text(res);
+                            }
+                        });
+                        openFrame($(".prewViewTxt"), [$(window).width() - 100 + 'px', $(window).height() - 50 + 'px'], $(obj).parent().prev().text() + '预览效果');
                         break;
                     default :
                         let strFilter=".jpeg|.gif|.jpg|.png|.bmp|.pic|";
                         let arr = strFilter.split("|", 6);
                         $.each(arr, (item, itemValue) => {
                             if ("." + fileType == itemValue) {
-                                $(value).html("<img style='width: 100px;' src='../../images/pic.jpg' class='imgHeader'>");
+                                $.get('../../getImgResolution', {fileId : $(obj).parent().prev().prev().prev().text()}, (res) => {
+                                    var width = res.result.split("*")[0] / 2, height = res.result.split("*")[1] / 2;
+                                    res != undefined ? $('#previewImg').css({
+                                        'width' : width,
+                                        'height' : height,
+                                    }) : undefined;
+                                    openFrame($("#previewImg"), [width + 10 + 'px', height + 20 + 'px'], $(obj).parent().prev().text() + '预览效果');
+                                }, 'json');
+                                $('#previewImg').attr('src', '../../previewFile?fileId=' + $(obj).parent().prev().prev().prev().text());
                                 return false;
                             }else {
-                                item == 5 ? $(value).html("<img style='width: 100px;' src='../../images/mp3.jpg' class='imgHeader'>") :
-                                    undefined;
+                                if (item == 5) {
+                                    $('.audio').css('display', 'block');
+                                    document.querySelector("#player").src = '../../previewFile?fileId=' + $(obj).parent().prev().prev().prev().text() + "&isMusic=true";
+                                }
                             }
                         });
 
@@ -113,28 +155,29 @@
             var data = obj.data;
             if(event == 'remove'){
                 layer.confirm('是否要删除？', {icon: 3, title: '系统提示'}, function(index){
-                    $.post('../../delMember', {'idArr': data.id}, function(res){
+                    $.post('../../delFile', {id: data.id}, function(res){
                         if(res.success) {
                             layer.msg('删除成功');
                             layer.close(index);
                             tbOp.reload({
-                                url:"../../getMemberInfo"
+                                url:"../../getAllFiles?selectVersion=0"
                             });
                         }
                         else{
                             layer.msg(res.errMsg, {icon:5, time:800});
                             layer.close(index);
                             tbOp.reload({
-                                url: "../../getMemberInfo"
+                                url: "../../getAllFiles?selectVersion=0"
                             });
                         }
                     }, 'json');
                 });
             }
         });
-        function openFrame (content, area) {
+        function openFrame (content, area, title) {
             layer.open({
-                content: $(content).html(),
+                title: title,
+                content: $(content),
                 type: 1,
                 area: [area[0], area[1]]
             });

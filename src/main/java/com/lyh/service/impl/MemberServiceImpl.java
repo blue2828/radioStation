@@ -66,10 +66,10 @@ public class MemberServiceImpl implements IMemberService {
     }
 
     @Override
-    public Member checkMember(Member member) {
+    public Member checkMember(Member member, boolean isWx) {
         Member mem = null;
         try {
-            mem = memberDao.checkMember(member);
+            mem = memberDao.checkMember(member, isWx);
         }catch (Exception e) {
             mem = null;
             e.printStackTrace();
@@ -110,6 +110,55 @@ public class MemberServiceImpl implements IMemberService {
         }catch (Exception e) {
             e.printStackTrace();
             flag = 0;
+        }
+        return flag;
+    }
+
+    @Override
+    public int delSessionKey(int id) {
+        int flag = 0;
+        try {
+            memberDao.delSessionKey(id);
+            flag = 1;
+        }catch (Exception e) {
+            e.printStackTrace();
+            flag = 0;
+        }
+        return flag;
+    }
+    @Override
+    public int selectMaxId() {
+        int result = 0;
+        try {
+            result = memberDao.selectMaxId();
+        }catch (Exception e) {
+            e.printStackTrace();
+            result = 0;
+        }
+        return result;
+    }
+
+    @Override
+    public Member selectMemberByKey(Member member) {
+        Member result = null;
+        try {
+            result = memberDao.selectMemberByKey(member);
+        }catch (Exception e) {
+            result = null;
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override
+    public int refreshKey(Member member) {
+        int flag = 0;
+        try {
+            memberDao.refreshKey(member);
+            flag = 1;
+        }catch (Exception e) {
+            flag = 0;
+            e.printStackTrace();
         }
         return flag;
     }

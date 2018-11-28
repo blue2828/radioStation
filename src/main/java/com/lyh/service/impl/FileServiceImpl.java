@@ -44,5 +44,17 @@ public class FileServiceImpl implements IFileService {
         return isSuccess;
     }
 
+    @Override
+    public int countFile(UserFile userFile, Page page) {
+        int count = 0;
+        try {
+            count = fileDao.countFile(userFile, page);
+        }catch (Exception e) {
+            count = 0;
+            e.printStackTrace();
+        }
+        return count;
+    }
+
 
 }
