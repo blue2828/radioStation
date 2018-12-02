@@ -79,10 +79,10 @@ public class MemberServiceImpl implements IMemberService {
 
     @Override
     @Transactional
-    public int editMember(Member member, String date) {
+    public int editMember(Member member, String date, boolean isWx) {
         int flag = 0;
         try {
-            memberDao.editMember(member, date);
+            memberDao.editMember(member, date, isWx);
             flag = 1;
         }catch (Exception e) {
             e.printStackTrace();

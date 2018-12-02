@@ -18,7 +18,7 @@ public class WxControllerUtil {
         String session_key = (String) session.getAttribute(key);
         Member m = memberService.checkMember(member, true);
         if (currentMember != null && m.getSession_key().equals(session_key))
-                flag = true;
+            flag = true;
         else
             flag = false;
         return flag;

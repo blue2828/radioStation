@@ -18,9 +18,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
+
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -40,7 +44,7 @@ public class WechatController {
     private WxControllerUtil wxControllerUtil;
     @RequestMapping("/onWxLogin")
     @ResponseBody
-    public Map<String, Object> onLogin (String code, HttpSession session) {
+    public Map<String, Object> onLogin (String code, HttpSession session, String remoteKey) {
         Map<String, Object> map = new HashMap<String, Object>();
         String url = "https://api.weixin.qq.com/sns/jscode2session?appid=".concat(APPID).concat("&secret=").concat(SECRET).concat("&js_code=")
                 .concat(code).concat("&grant_type=authorization_code");
@@ -56,17 +60,21 @@ public class WechatController {
             String key = new StringUtil().getRandomStr();
             Member currentWxMember = (Member) session.getAttribute("currentWxMember");
             if (currentWxMember != null) {
-                map.put("success", true);
-                currentWxMember.setOpenid(null);
-                currentWxMember.setSession_key(null);
-                map.put("currentWxMember", currentWxMember);
-                map.put("session_key", key);
+                if (wxControllerUtil.isLogined(session, currentWxMember, (String) session.getAttribute(remoteKey))) {
+                    map.put("success", true);
+                    currentWxMember.setOpenid(null);
+                    currentWxMember.setSession_key(null);
+                    map.put("currentWxMember", currentWxMember);
+                }else {
+                    map.put("errMsg", "登录授权失败");
+                    map.put("success", false);
+                }
                 return map;
             }
             Member result = memberService.checkMember(member, true);
             if (result == null) {
                 int maxId = memberService.selectMaxId();
-                member.setNickName("电台用户_" + UUID.randomUUID().toString());
+                member.setNickName("电台用户_" + UUID.randomUUID().toString().substring(0, 10));
                 member.setId(maxId + 1);
                 member.setSession_key(session_key);
                 int flag = memberService.insertUser(member);
@@ -96,6 +104,49 @@ public class WechatController {
             }
         }else {
             map.put("errMsg", "授权登录失败");
+        }
+        return map;
+    }
+    @RequestMapping("/editWxMember")
+    @ResponseBody
+    public Map<String, Object> editWxMember (@RequestParam(value = "wxImg", required = false) MultipartFile wxImg, Member member, String birthDay, HttpSession session) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        boolean fileFlag = false;
+        if (wxImg != null) {
+            String type = wxImg.getOriginalFilename().substring(wxImg.getOriginalFilename().lastIndexOf("."));
+            String fileName = wxImg.getName();
+            fileName = StringUtil.mkFileName(fileName, type);
+            member.setImageHeaderAddr("d:/fileUpload".concat(File.separator).concat(fileName));
+            try {
+                wxImg.transferTo(new File("d:/fileUpload".concat(File.separator).concat(fileName)));
+                fileFlag = true;
+            }catch (Exception e) {
+                e.printStackTrace();
+                fileFlag = false;
+            }
+        }else {
+            Member temp = new Member(member.getId());
+            Member currentMember = memberService.queryMemberAllOrSth(new Page(1, 30), temp).get(0);
+            member.setImageHeaderAddr(currentMember.getImageHeaderAddr());
+        }
+        member.setBirthday(new StringUtil().formatStrTimeToDate(birthDay, "yyyy-MM-dd"));
+        int flag = memberService.editMember(member, null, true);
+        if (wxImg != null) {
+            if (!fileFlag)
+                logger.info("头像上传到磁盘失败");
+            if (flag <= 0)
+                logger.info("保存到数据库失败");
+            if (flag > 0 && fileFlag)
+                map.put("isSuccessed", true);
+            else
+                map.put("isSuccessed", false);
+        }else {
+            if (flag > 0)
+                map.put("isSuccessed", true);
+            else {
+                map.put("isSuccessed", false);
+                logger.info("保存到数据库失败");
+            }
         }
         return map;
     }

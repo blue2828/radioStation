@@ -13,6 +13,16 @@ public class EnumUtil {
         }
         return str;
     }
+    public static String formatIntStationStateToStr (int state) {
+        String str = "";
+        switch (state) {
+            case 0 : str = "在线";
+                break;
+            case 1 : str = "未在线";
+                break;
+        }
+        return str;
+    }
     public static String formatIntTypeToStr (int type) {
         String str = "";
         switch (type) {
@@ -45,6 +55,16 @@ public class EnumUtil {
             case 1 : str = "主播";
                 break;
             case 2 : str = "管理员";
+                break;
+        }
+        return str;
+    }
+    private static String formatListenTypeToStr (int listenType) {
+        String str = "";
+        switch (listenType) {
+            case 0 : str = "录音";
+                break;
+            case 1 : str = "直播";
                 break;
         }
         return str;

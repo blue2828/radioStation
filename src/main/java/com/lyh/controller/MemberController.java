@@ -28,7 +28,8 @@ public class MemberController {
     @Autowired
     @Qualifier("memberService")
     private IMemberService memberService;
-
+    @Autowired
+    private StringUtil stringUtil;
     @RequestMapping("/checkLogin")
     @ResponseBody
     public Map<String, Object> checkLogin (Member member, HttpSession session) {
@@ -54,7 +55,7 @@ public class MemberController {
         JSONObject jb = new JSONObject();
         jb.put("code", 0);
         jb.put("msg", "");
-        jb.put("data", new StringUtil().formatListToJson(memberService.queryMemberAllOrSth(page, member)));
+        jb.put("data", stringUtil.formatListToJson(memberService.queryMemberAllOrSth(page, member)));
         jb.put("count", memberService.countMember(page, member));
         return jb;
     }
@@ -72,8 +73,9 @@ public class MemberController {
         FileInputStream inputStream = null;
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] result = null;
+        int sex = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(memberId)).get(0).getSex();
         try {
-            inputStream = new FileInputStream(new File(memberService.getImageHeader(memberId)));
+            inputStream = new FileInputStream(new File(memberService.getImageHeader(memberId) == null ? "" : memberService.getImageHeader(memberId)));
             bufferedInputStream = new BufferedInputStream((inputStream));
             int temp = 0;
             byte[] buffer = new byte[1024];
@@ -86,7 +88,6 @@ public class MemberController {
         }catch(FileNotFoundException e) {
             String path = null;
             try {
-                int sex = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(memberId)).get(0).getSex();
                 File file = ResourceUtils.getFile("classpath:static/images" + java.io.File.separator + (sex == 0 ? "manHeader.jpg" : "wmHeader.jpg"));
                 inputStream = new FileInputStream(file);
                 bufferedInputStream = new BufferedInputStream((inputStream));
@@ -159,11 +160,11 @@ public class MemberController {
         Member currentMember = (Member) session.getAttribute("currentMember");
         List<Member> list = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(currentMember.getId()));
         JSONObject result = new JSONObject();
-        result.put("currentMember", new StringUtil().formatListToJson(list));
+        result.put("currentMember", stringUtil.formatListToJson(list));
         if (null == list.get(0).getLastTimeLogin())
             result.put("lastTimeLogin", "此次为第一次登录");
         else
-            result.put("lastTimeLogin", new StringUtil().formatTime(list.get(0).getLastTimeLogin(), "yyyy-MM-dd HH:mm:ss"));
+            result.put("lastTimeLogin", stringUtil.formatTime(list.get(0).getLastTimeLogin(), "yyyy-MM-dd HH:mm:ss"));
         return result;
     }
     @RequestMapping("/logout")
@@ -175,7 +176,7 @@ public class MemberController {
     @ResponseBody
     public Map<String, Object> editMember (Member member, String date) {
         Map<String, Object> map = new HashMap<String, Object>();
-        int flag = memberService.editMember(member, date);
+        int flag = memberService.editMember(member, date, false);
         switch (flag) {
             case 1 :
                 map.put("success", true);
@@ -196,7 +197,7 @@ public class MemberController {
             map.put("errMsg", true);
             return map;
         }
-        memberService.refreshDate(new StringUtil().getCurrentTimeStr(), m.getId());
+        memberService.refreshDate(stringUtil.getCurrentTimeStr(), m.getId());
         map.put("complete", true);
         return map;
     }

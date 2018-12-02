@@ -12,7 +12,7 @@ public interface IMemberService {
     int countMember (Page page, Member member);
     String getImageHeader (int memberId);
     Member checkMember (Member member, boolean isWx);
-    int editMember(Member member, String date);
+    int editMember(Member member, String date, boolean isWx);
     void refreshDate(String lastLoginTime, int id);
     int delMember (int id);
     int delSessionKey (int id);

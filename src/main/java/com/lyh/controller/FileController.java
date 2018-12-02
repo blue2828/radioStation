@@ -23,7 +23,8 @@ public class FileController {
     @Autowired
     @Qualifier("fileService")
     private IFileService fileServiceImpl;
-
+    @Autowired
+    private StringUtil stringUtil;
     private static Logger logger = LoggerFactory.getLogger(FileController.class);
     @RequestMapping("/getAllFiles")
     @ResponseBody
@@ -40,7 +41,7 @@ public class FileController {
         }
         List<UserFile> list = fileServiceImpl.getAllFiles(userFile, page);
         Map<String, Object> result = new HashMap<String, Object>();
-        result.put("data", new StringUtil().formatListToJson(list));
+        result.put("data", stringUtil.formatListToJson(list));
         result.put("count", fileServiceImpl.countFile(userFile, page));
         result.put("msg", "");
         result.put("code", 0);
@@ -75,7 +76,6 @@ public class FileController {
                 }else{
                     result.put("success", false);
                     result.put("msg", "本地文件删除失败");
-
                 }
             }
         }else{
@@ -190,7 +190,7 @@ public class FileController {
         List<UserFile> list = fileServiceImpl.getAllFiles(userFile, new Page(1, 30));
         File file = new File(list.get(0).getStoreAddr());
         if (list.get(0).getType() == 2) {
-            result.put("result", new StringUtil().getImgResolution(file));
+            result.put("result", stringUtil.getImgResolution(file));
         }
         return result;
     }

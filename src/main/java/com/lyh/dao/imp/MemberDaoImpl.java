@@ -37,8 +37,8 @@ public class MemberDaoImpl implements IMemberDao {
     }
 
     @Override
-    public void editMember(Member member, String str) {
-        memberDao.editMember(member, str);
+    public void editMember(Member member, String str, boolean isWx) {
+        memberDao.editMember(member, str, isWx);
     }
 
     @Override

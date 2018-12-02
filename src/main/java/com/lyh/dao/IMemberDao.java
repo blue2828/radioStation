@@ -26,7 +26,7 @@ public interface IMemberDao {
     @Select("<script><if test=\"isWx == true\"> select * from member where openid = #{member.openid}</if>" +
             "<if test=\"isWx == false\"> select * from member where id = #{member.id} and pwd = #{member.pwd}</if></script>")
     Member checkMember (@Param("member") Member member, @Param("isWx") boolean isWx);
-    @Update("update member set userName = #{member.userName}, " +
+    @Update("<script>update member set userName = #{member.userName}, " +
             "pwd = #{member.pwd}, " +
             "birthday = #{member.birthday}, " +
             "sex = #{member.sex}, " +
@@ -36,8 +36,8 @@ public interface IMemberDao {
             "nickName = #{member.nickName}, " +
             "label = #{member.label}, " +
             "roleId = #{member.roleId}, " +
-            "lastTimeLogin = #{date}, openid = #{member.openid}, session_key = #{member.session_key} where id = #{member.id} ")
-    void editMember (@Param("member") Member member, @Param("date") String date);
+            "lastTimeLogin = #{date} <if test=\"isWx != true\">,openid = #{member.openid}</if><if test=\"isWx != true\">, session_key = #{member.session_key}</if> where id = #{member.id}</script>")
+    void editMember (@Param("member") Member member, @Param("date") String date, @Param("isWx") boolean isWx);
     @Select("update Member set lastTimeLogin = #{lastTimeLogin} where id = #{id}")
     void refreshDate (@Param("lastTimeLogin") String lastTimeLogin, @Param("id") int id );
     @Delete("delete from Member where id = #{id}")

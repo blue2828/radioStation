@@ -3,6 +3,10 @@ package com.lyh.util;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lyh.entity.*;
+import com.lyh.service.IMemberService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -10,15 +14,15 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-
+import java.util.*;
+@Component
 public class StringUtil {
+    @Autowired
+    @Qualifier("memberService")
+    private IMemberService memberService;
 
     public static boolean isEmpty(String str){
-        if(str==null||"".equals(str))
+        if(str == null || "".equals(str))
             return true;
         else
             return false;
@@ -41,7 +45,7 @@ public class StringUtil {
                         else if (fieldName.equals("createTime"))
                             tempJb.put("createTime", this.formatTime(((Record) list.get(i)).getCreateTime(), "yyyy-MM-dd HH:mm:ss"));
                         else if (fieldName.equals("stationState"))
-                            tempJb.put("stationState", EnumUtil.formatIntSexToStr(((Station) list.get(i)).getStationState()));
+                            tempJb.put("stationState", EnumUtil.formatIntStationStateToStr(((Station) list.get(i)).getStationState()));
                         else if (fieldName.equals("lastTimeBroadcast"))
                             tempJb.put("lastTimeBroadcast", this.formatTime(((Station) list.get(i)).getLastTimeBroadcast(), "yyyy-MM-dd HH:mm:ss"));
                         else if (fieldName.equals("uploadDate"))
@@ -50,21 +54,36 @@ public class StringUtil {
                             tempJb.put("roleId", EnumUtil.formatIntRoleToStr(((Member) list.get(i)).getRoleId()));
                         else if (fieldName.equals("type"))
                             tempJb.put("type", EnumUtil.formatIntTypeToStr(((UserFile) list.get(i)).getType()));
+                        else if (fieldName.equals("lastTimeMemberId"))
+                            tempJb.put("lastTimeMemberId", memberService.queryMemberAllOrSth(new Page(1, 30), new Member(((Station)list.get(i)).getLastTimeMemberId())).get(0).getUserName());
                             else
                                 tempJb.put(fieldName, this.getFieldValueByName(fieldName, list.get(i)));
                 }
                 array.add(tempJb);
             }
-        //}
-
         return array;
     }
-
+    public Date formatStrTimeToDate (String date, String formatStr) {
+        SimpleDateFormat spdf = new SimpleDateFormat(formatStr);
+        Date result = null;
+        try {
+            if (formatStr != null) {
+                result = spdf.parse(date);
+            }
+        }catch (Exception e) {
+            result = null;
+            e.printStackTrace();
+        }
+        return result;
+    }
     public String formatTime (Date date, String formatStr) {
         String str = "";
         try {
             SimpleDateFormat spdf = new SimpleDateFormat(formatStr);
-            str = spdf.format(date);
+            if (date != null)
+                str = spdf.format(date);
+            else
+                str = "";
         }catch (Exception e) {
             e.printStackTrace();
             str = "";
@@ -130,5 +149,7 @@ public class StringUtil {
         }
         return result;
     }
-
+    public static String mkFileName (String fileName, String type) {
+        return fileName = fileName.concat("_").concat(UUID.randomUUID().toString().replace("-", "_")).concat(type);
+    }
 }
