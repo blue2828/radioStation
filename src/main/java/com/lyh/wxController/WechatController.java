@@ -1,9 +1,12 @@
 package com.lyh.wxController;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lyh.entity.Member;
 import com.lyh.entity.Page;
+import com.lyh.entity.listenHistory;
+import com.lyh.service.IListenHistoryService;
 import com.lyh.service.IMemberService;
 import com.lyh.util.StringUtil;
 import com.lyh.util.WxControllerUtil;
@@ -23,8 +26,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.File;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -42,6 +46,10 @@ public class WechatController {
     @Autowired
     @Qualifier("wxControllerUtil")
     private WxControllerUtil wxControllerUtil;
+    @Autowired
+    private StringUtil stringUtil;
+    @Autowired
+    private IListenHistoryService listenHistoryService;
     @RequestMapping("/onWxLogin")
     @ResponseBody
     public Map<String, Object> onLogin (String code, HttpSession session, String remoteKey) {
@@ -80,7 +88,7 @@ public class WechatController {
                 int flag = memberService.insertUser(member);
                 if (flag > 0) {
                     logger.info("成功添加用户");
-                    Member thisMem = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(maxId + 1)).get(0);
+                    Member thisMem = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(maxId + 1, -1)).get(0);
                     session.setAttribute("currentWxMember", thisMem);
                     session.setAttribute(key, session_key);
                     map.put("success", true);
@@ -125,7 +133,7 @@ public class WechatController {
                 fileFlag = false;
             }
         }else {
-            Member temp = new Member(member.getId());
+            Member temp = new Member(member.getId(), -1);
             Member currentMember = memberService.queryMemberAllOrSth(new Page(1, 30), temp).get(0);
             member.setImageHeaderAddr(currentMember.getImageHeaderAddr());
         }
@@ -150,4 +158,53 @@ public class WechatController {
         }
         return map;
     }
+    @RequestMapping("/getListetnHistory")
+    @ResponseBody
+    public JSONObject getListetnHistory () {
+        JSONObject jsonObject = new JSONObject();
+        JSONArray array = stringUtil.formatListToJson(listenHistoryService.getHistory(new listenHistory()));
+        jsonObject.put("list", array);
+        return jsonObject;
+    }
+    @RequestMapping("/readRecord")
+    public void readRecord (HttpServletResponse response, int listenHistoryId) {
+        BufferedInputStream bufferedInputStream = null;
+        FileInputStream inputStream = null;
+        BufferedOutputStream outputStream = null;
+        OutputStream out = null;
+        listenHistory lh = listenHistoryService.getHistory(new listenHistory(listenHistoryId)).get(0);
+        File file = new File(lh.getTargetFile());
+        long length = file.length();
+        response.addHeader("Accept-Ranges", "bytes");
+        response.addHeader("Content-Length", length + "");
+        response.addHeader("Content-Type", "audio/mpeg;charset=UTF-8");
+        try {
+            inputStream = new FileInputStream(file);
+            bufferedInputStream = new BufferedInputStream((inputStream));
+            out = response.getOutputStream();
+            outputStream = new BufferedOutputStream(out);
+            int temp = 0;
+            byte[] buffer = new byte[1024];
+            while ((temp = bufferedInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, temp);
+                outputStream.flush();
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                if (null != bufferedInputStream)
+                    bufferedInputStream.close();
+                if (null != inputStream)
+                    inputStream.close();
+                if(null != out)
+                    out.close();
+                if (null != outputStream)
+                    outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

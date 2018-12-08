@@ -59,7 +59,7 @@ public class EnumUtil {
         }
         return str;
     }
-    private static String formatListenTypeToStr (int listenType) {
+    public static String formatListenTypeToStr (int listenType) {
         String str = "";
         switch (listenType) {
             case 0 : str = "录音";
@@ -69,5 +69,4 @@ public class EnumUtil {
         }
         return str;
     }
-
 }

@@ -10,13 +10,13 @@
             opacity : 0.3;
             filter: Alpha(opacity = 30)
         }
-        .div-bor{
+        .div-bor {
             z-index: 5;position: relative;width: 200px;
             top: 280px;
             left: 41%;
         }
-        .icon-user, .icon-pwd{
-            position: absolute;left: 10px;z-index:5;
+        .icon-user, .icon-pwd {
+            position: absolute;left: 10px;z-index: 5;
             background-image: url("../images/user.png");
             background-repeat: no-repeat;
             width: 20px;
@@ -74,7 +74,7 @@
     <form class="layui-form" lay-filter="fm">
         <div class="div-bor">
             <i class="icon-user"></i>
-            <input type="text" name="id" class="user" placeholder="用户名">
+            <input type="text" name="id" class="user" placeholder="账号">
         </div>
         <div class="div-bor" style="margin-top: 18px;">
             <i class="icon-pwd" style="background-image: url('../images/pwd.png');"></i>
@@ -150,7 +150,7 @@
             }
             form.on('submit(btn_submit)', function (data) {
                 $.ajax({
-                    url : '../checkLogin',
+                    url : '../checkLogin?isApp=0',
                     data : data.field,
                     dataType : 'json',
                     success : (res, state, xhr) => {
@@ -163,6 +163,9 @@
                         }else {
                             layer.msg(res.errMsg, {icon : 5});
                         }
+                    },
+                    error: function () {
+                        layer.msg("服务器出错", {icon: 5, time: 1200});
                     }
                 });
             });

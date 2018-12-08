@@ -32,16 +32,29 @@ public class MemberController {
     private StringUtil stringUtil;
     @RequestMapping("/checkLogin")
     @ResponseBody
-    public Map<String, Object> checkLogin (Member member, HttpSession session) {
+    public Map<String, Object> checkLogin (Member member, HttpSession session, int isApp) {
         Map<String, Object> map = new HashMap<String, Object>();
         Member result = memberService.checkMember(member, false);
-         if (result.getRoleId() != 2) {
-            map.put("success", false);
-            map.put("errMsg", "非管理员不能登录");
-        }else if (result != null) {
-             map.put("success", true);
-             session.setAttribute("currentMember", result);
-         }else {
+        if (isApp == 1) {
+            if (result != null) {
+                map.put("success", true);
+                result.setPwd(null);
+                result.setOpenid(null);
+                result.setSession_key(null);
+                map.put("currentMember", result);
+                session.setAttribute("currentMember", result);
+                return map;
+            }
+        }
+        if (null != result) {
+            if (result.getRoleId() != 2) {
+                map.put("success", false);
+                map.put("errMsg", "非管理员不能登录");
+            }else {
+                map.put("success", true);
+                session.setAttribute("currentMember", result);
+            }
+        }else {
             map.put("success", false);
             map.put("errMsg", "账号或密码错误");
         }
@@ -50,7 +63,11 @@ public class MemberController {
 
     @RequestMapping("/getMemberInfo")
     @ResponseBody
-    public JSONObject queryMemberAllOrSth (Page page, Member member) {
+    public JSONObject queryMemberAllOrSth (Page page, Member member, String s_sex) {
+        if (!StringUtil.isEmpty(s_sex))
+            member.setSex(Integer.parseInt(s_sex));
+        else
+            member.setSex(-1);
         page = page.getPage() == 0 && page.getLimit() == 0 ? new Page(1, 30) : page;
         JSONObject jb = new JSONObject();
         jb.put("code", 0);
@@ -73,7 +90,11 @@ public class MemberController {
         FileInputStream inputStream = null;
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] result = null;
-        int sex = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(memberId)).get(0).getSex();
+        List<Member> currentMember = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(memberId, -1));
+        int sex = 0;
+        if (currentMember.size() > 0) {
+            sex = currentMember.get(0).getSex();
+        }
         try {
             inputStream = new FileInputStream(new File(memberService.getImageHeader(memberId) == null ? "" : memberService.getImageHeader(memberId)));
             bufferedInputStream = new BufferedInputStream((inputStream));
@@ -101,6 +122,7 @@ public class MemberController {
                 base24Str = JSON.toJSONString(result);
             }catch (Exception ee) {
                 ee.printStackTrace();
+                base24Str = null;
             }
             e.printStackTrace();
         }catch (Exception e) {
@@ -158,13 +180,20 @@ public class MemberController {
     @ResponseBody
     public JSONObject getCurrentMember (HttpSession session) {
         Member currentMember = (Member) session.getAttribute("currentMember");
-        List<Member> list = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(currentMember.getId()));
         JSONObject result = new JSONObject();
+        if (currentMember == null) {
+            result.put("currentMember", null);
+            return result;
+        }
+        List<Member> list = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(currentMember.getId(), -1));
         result.put("currentMember", stringUtil.formatListToJson(list));
-        if (null == list.get(0).getLastTimeLogin())
-            result.put("lastTimeLogin", "此次为第一次登录");
-        else
-            result.put("lastTimeLogin", stringUtil.formatTime(list.get(0).getLastTimeLogin(), "yyyy-MM-dd HH:mm:ss"));
+        if (list.size() > 0) {
+            if (null == list.get(0).getLastTimeLogin())
+                result.put("lastTimeLogin", "此次为第一次登录");
+            else
+                result.put("lastTimeLogin", stringUtil.formatTime(list.get(0).getLastTimeLogin(), "yyyy-MM-dd HH:mm:ss"));
+        }else
+            result.put("currentMember", null);
         return result;
     }
     @RequestMapping("/logout")
@@ -172,7 +201,7 @@ public class MemberController {
         session.removeAttribute("currentMember");
         return "redirect:/page/login.html";
     }
-    @RequestMapping("/editMember")
+    /*@RequestMapping("/editMember")
     @ResponseBody
     public Map<String, Object> editMember (Member member, String date) {
         Map<String, Object> map = new HashMap<String, Object>();
@@ -186,7 +215,7 @@ public class MemberController {
                     map.put("errMsg", "编辑失败");
         }
         return map;
-    }
+    }*/
     @RequestMapping("/refreshLoginTime")
     @ResponseBody
     public Map<String, Object> refreshLoginTime (HttpSession session) {
@@ -207,13 +236,13 @@ public class MemberController {
         Map<String, Object> map = new HashMap<String, Object>();
         String[] ids = idArr.split(",");
         int count = 0;
-        List<Integer> list = new ArrayList<Integer>();
+        List<Object> list = new ArrayList<Object>();
         for (String id : ids) {
             if (!StringUtil.isEmpty(id)) {
                 memberService.delMember(Integer.parseInt(id));
                 count ++;
             } else {
-                list.add(Integer.parseInt(id));
+                list.add(id);
                 continue;
             }
         }
@@ -231,5 +260,32 @@ public class MemberController {
             map.put("errMsg", "删除失败，失败条数：" + list.size() + "，删除失败的用户编号：" + items);
         }
         return map;
+    }
+    @RequestMapping("/saveMember")
+    @ResponseBody
+    public JSONObject saveMember (Member member, int isEdit, String birthDay) {
+        JSONObject result = new JSONObject();
+        int flag = 0;
+        if (!StringUtil.isEmpty(birthDay))
+            member.setBirthday(new StringUtil().formatStrTimeToDate(birthDay, "yyyy-MM-dd"));
+        if (isEdit == 1) {
+            Member temp = new Member(member.getId(), -1);
+            Member currentMember = memberService.queryMemberAllOrSth(new Page(1, 30), temp).get(0);
+            member.setImageHeaderAddr(currentMember.getImageHeaderAddr());
+            member.setPwd(currentMember.getPwd());
+            flag = memberService.editMember(member, null, false);
+        }
+        else
+            flag = memberService.insertUser(member);
+        switch (flag) {
+            case 0 :
+                result.put("success", false);
+                result.put("errMsg", "保存失败");
+                break;
+            case 1 :
+                result.put("success", true);
+                break;
+        }
+        return result;
     }
 }

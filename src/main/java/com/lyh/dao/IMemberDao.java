@@ -8,18 +8,19 @@ import java.util.List;
 
 @Mapper
 public interface IMemberDao {
-    @Insert("insert into member values (#{member.id}, #{member.userName}, #{member.pwd}, #{member.birthday}, #{member.sex}, #{member.phone}," +
-            " #{member.email}, #{member.imageHeaderAddr}, #{member.nickName}, #{member.label}, #{member.roleId}, null, #{member.openid}, #{member.session_key}, #{member.wechatNo})")
+    @Insert("<script>insert into member values (#{member.id}, #{member.userName}, <if test=\"member.pwd==null\">123</if><if test=\"member.pwd!=null\">#{member.pwd }</if>, #{member.birthday}, #{member.sex}, #{member.phone}," +
+            " #{member.email}, #{member.imageHeaderAddr}, #{member.nickName}, #{member.label}, #{member.roleId}, null, #{member.openid}, #{member.session_key}, #{member.wechatNo})</script>")
     int insertUser (@Param("member") Member member);
     @Select("<script>select * from member where 1 = 1 <if test=\"member.userName != null\">and userName like " +
             "concat('%', #{member.userName}, '%')</if>" +
             "<if test=\"member.nickName != null\"> and nickName like concat('%', #{member.nickName}, '%')</if>" +
-            "<if test=\"member.id != 0\"> and id = #{member.id}</if> limit #{page.start}, #{page.limit}</script>")
+            "<if test=\"member.id != 0\"> and id = #{member.id}</if><if test=\"member.sex != -1\"> and sex = #{member.sex}</if> limit #{page.start}, #{page.limit}</script>")
     List<Member> queryMemberAllOrSth (@Param("page") Page page, @Param("member")Member member);
     @Select("<script>select count(*) as hh from member where 1 = 1 <if test=\"member.userName != null\">and userName like " +
             "concat('%', #{member.userName}, '%')</if>" +
             "<if test=\"member.nickName != null\"> and nickName like concat('%', #{member.nickName}, '%')</if>" +
-            "<if test=\"member.id != 0\"> and id = #{member.id}</if> limit #{page.start}, #{page.limit}</script>")
+            "<if test=\"member.id != 0\"> and id = #{member.id}</if><if test=\"member.sex != -1\"> and sex = #{member.sex}</if>" +
+            "limit #{page.start}, #{page.limit}</script>")
     int countMember (@Param("page") Page page, @Param("member")Member member);
     @Select("select imageHeaderAddr from member where id = #{memberId} ")
     String getImageHeader (@Param("memberId") int memberId);

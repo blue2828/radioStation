@@ -54,8 +54,21 @@ public class StringUtil {
                             tempJb.put("roleId", EnumUtil.formatIntRoleToStr(((Member) list.get(i)).getRoleId()));
                         else if (fieldName.equals("type"))
                             tempJb.put("type", EnumUtil.formatIntTypeToStr(((UserFile) list.get(i)).getType()));
-                        else if (fieldName.equals("lastTimeMemberId"))
-                            tempJb.put("lastTimeMemberId", memberService.queryMemberAllOrSth(new Page(1, 30), new Member(((Station)list.get(i)).getLastTimeMemberId())).get(0).getUserName());
+                        else if (fieldName.equals("lastTimeMemberId")) {
+                        List<Member> tempList = memberService.queryMemberAllOrSth(new Page(1, 30),
+                                new Member(((Station)list.get(i)).getLastTimeMemberId(), -1));
+                            tempJb.put("lastTimeMemberId", tempList.size() > 0 ? tempList.get(0).getUserName() : "");
+                         }else if (fieldName.equals("memberId") && (list.get(0).getClass()) == listenHistory.class) {
+                            tempJb.put("memberId", memberService.queryMemberAllOrSth(new Page(1, 30),
+                                new Member(((listenHistory)list.get(i)).getMemberId(), -1)).get(0).getUserName());
+                         }else if (fieldName.equals("listenTime"))
+                            tempJb.put("listenTime", this.formatTime(((listenHistory) list.get(i)).getListenTime(), "yyyy-MM-dd HH:mm:ss"));
+                          else if (fieldName.equals("listenType"))
+                            tempJb.put("listenType", EnumUtil.formatListenTypeToStr(((listenHistory) list.get(i)).getListenType()));
+                          else if (fieldName.equals("uploadMemId")) {
+                            List<Member> listMember = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(((UserFile) list.get(i)).getUploadMemId(), -1));
+                            tempJb.put("uploadMemId", listMember.size() > 0 ? listMember.get(0).getUserName() : "");
+                         }
                             else
                                 tempJb.put(fieldName, this.getFieldValueByName(fieldName, list.get(i)));
                 }

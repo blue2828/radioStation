@@ -10,6 +10,10 @@ public class listenHistory implements java.io.Serializable {
     public listenHistory() {
     }
 
+    public listenHistory(int id) {
+        this.id = id;
+    }
+
     public int getId() {
         return id;
     }

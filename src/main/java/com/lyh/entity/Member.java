@@ -118,6 +118,11 @@ public class Member implements java.io.Serializable{
         this.id = id;
     }
 
+    public Member(int id, int sex) {
+        this.id = id;
+        this.sex = sex;
+    }
+
     public Member(int sex, int roleId, String userName, String pwd, String phone, String email, String imageHeaderAddr, String nickName, String label, Date birthday, Date lastTimeLogin) {
         this.sex = sex;
         this.roleId = roleId;

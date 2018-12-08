@@ -115,8 +115,8 @@ public class FileController {
         userFile.setUploadMemId(-1);
         userFile.setType(-1);
         List<UserFile> list = fileServiceImpl.getAllFiles(userFile, new Page(1, 30));
-        response.setContentType("multipart/form-data");
-        response.setHeader("Content-Disposition", "attachment;fileName=" + list.get(0).getStoreAddr().substring(list.get(0).getStoreAddr().indexOf("_") + 1));
+        //response.setContentType("multipart/form-data");
+       // response.setHeader("Content-Disposition", "attachment;fileName=" + list.get(0).getStoreAddr().substring(list.get(0).getStoreAddr().indexOf("_") + 1));
         File file = new File(list.get(0).getStoreAddr());
         if (isMusic) {
             long length = file.length();
@@ -130,15 +130,14 @@ public class FileController {
             if (!isTxt){
                 out = response.getOutputStream();
                 outputStream = new BufferedOutputStream(out);
-            }
-            if (!isTxt) {
                 int temp = 0;
                 byte[] buffer = new byte[1024];
                 while ((temp = bufferedInputStream.read(buffer)) != -1) {
                     outputStream.write(buffer, 0, temp);
                     outputStream.flush();
                 }
-            }else {
+            }
+            else {
                 BufferedReader reader = null;
                 InputStreamReader inputStreamReader = null;
                 response.setContentType("text/html;charset=utf-8");
