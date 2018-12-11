@@ -29,5 +29,10 @@ public class FileDaoImpl implements IFileDao {
         return fileDao.delFile(id);
     }
 
+    @Override
+    public void saveFile(UserFile userFile) {
+
+    }
+
 
 }

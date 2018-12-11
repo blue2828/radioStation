@@ -201,21 +201,6 @@ public class MemberController {
         session.removeAttribute("currentMember");
         return "redirect:/page/login.html";
     }
-    /*@RequestMapping("/editMember")
-    @ResponseBody
-    public Map<String, Object> editMember (Member member, String date) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        int flag = memberService.editMember(member, date, false);
-        switch (flag) {
-            case 1 :
-                map.put("success", true);
-                break;
-                default:
-                    map.put("success", false);
-                    map.put("errMsg", "编辑失败");
-        }
-        return map;
-    }*/
     @RequestMapping("/refreshLoginTime")
     @ResponseBody
     public Map<String, Object> refreshLoginTime (HttpSession session) {

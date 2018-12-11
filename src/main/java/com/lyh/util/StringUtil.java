@@ -165,4 +165,7 @@ public class StringUtil {
     public static String mkFileName (String fileName, String type) {
         return fileName = fileName.concat("_").concat(UUID.randomUUID().toString().replace("-", "_")).concat(type);
     }
+    public static String mkRecordName (String fileName, String type) {
+        return fileName = fileName.concat("_").concat(new StringUtil().getCurrentTimeStr().replaceAll(" ", "_").replaceAll(":", "_")).concat(type);
+    }
 }

@@ -34,11 +34,11 @@
     function connect(){
         var socket = new SockJS('/enpointHH'); //连接SockJS的endpoint名称为"endpointWisely"
         stompClient = Stomp.over(socket);//使用STMOP子协议的WebSocket客户端
-        stompClient.connect({},function(frame){//连接WebSocket服务端
+        stompClient.connect({}, function(frame){//连接WebSocket服务端
             setConnected(true);
             console.log('Connected:' + frame);
             //通过stompClient.subscribe订阅/topic/getResponse 目标(destination)发送的消息,这个是在控制器的@SentTo中定义的
-            stompClient.subscribe('/topic/resMsg',function(response){
+            stompClient.subscribe('/topic/resMsg', function(response){
                 showResponse(JSON.parse(response.body).resMsg);
             });
         });
@@ -55,7 +55,7 @@
     function sendName(){
         var name = $("#name").val();
         //通过stompClient.send向/welcome 目标(destination)发送消息,这个是在控制器的@MessageMapping中定义的
-        stompClient.send("/hello",{},JSON.stringify({'content': name}));
+        stompClient.send("/welcome",{},JSON.stringify({'content': name}));
     }
 
     function showResponse(message){
