@@ -6,6 +6,7 @@ import com.lyh.entity.Station;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 @Repository
 public class StationDao implements IStationDao {
@@ -19,5 +20,20 @@ public class StationDao implements IStationDao {
     @Override
     public int countStation(Page page) {
         return stationDao.countStation(page);
+    }
+
+    @Override
+    public void updateStationState(Station station) {
+        stationDao.updateStationState(station);
+    }
+
+    @Override
+    public Date getLastTime(int id) {
+        return stationDao.getLastTime(id);
+    }
+
+    @Override
+    public  List<Station> getCurrentStation() {
+        return stationDao.getCurrentStation();
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 @Service
 public class StationService implements IStationService{
@@ -32,6 +33,43 @@ public class StationService implements IStationService{
             result = stationDao.countStation(page);
         }catch (Exception e) {
             result = 0;
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override
+    public boolean updateStationState(Station station) {
+        boolean flag = false;
+        try {
+            stationDao.updateStationState(station);
+            flag = true;
+        }catch (Exception e) {
+            e.printStackTrace();
+            flag = false;
+        }
+        return flag;
+    }
+
+    @Override
+    public Date getLastTime(int id) {
+        Date date = null;
+        try {
+            date = stationDao.getLastTime(id);
+        }catch (Exception e) {
+            date = null;
+            e.printStackTrace();
+        }
+        return date;
+    }
+
+    @Override
+    public  List<Station> getCurrentStation() {
+        List<Station> result = null;
+        try {
+            result = stationDao.getCurrentStation();
+        }catch (Exception e) {
+            result = null;
             e.printStackTrace();
         }
         return result;

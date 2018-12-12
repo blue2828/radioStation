@@ -39,16 +39,18 @@ public interface IMemberDao {
             "roleId = #{member.roleId}, " +
             "lastTimeLogin = #{date} <if test=\"isWx != true\">,openid = #{member.openid}</if><if test=\"isWx != true\">, session_key = #{member.session_key}</if> where id = #{member.id}</script>")
     void editMember (@Param("member") Member member, @Param("date") String date, @Param("isWx") boolean isWx);
-    @Select("update Member set lastTimeLogin = #{lastTimeLogin} where id = #{id}")
+    @Select("update member set lastTimeLogin = #{lastTimeLogin} where id = #{id}")
     void refreshDate (@Param("lastTimeLogin") String lastTimeLogin, @Param("id") int id );
-    @Delete("delete from Member where id = #{id}")
+    @Delete("delete from member where id = #{id}")
     void delMember (@Param("id") int id);
-    @Delete("update Member set sessionKey = NULL where id = #{id}")
+    @Delete("update member set sessionKey = NULL where id = #{id}")
     void delSessionKey (@Param("id") int id);
     @Select("SELECT MAX(id) FROM member")
     int selectMaxId ();
-    @Select("select * from memeber where session_key = #{member.session_key}")
+    @Select("select * from member where session_key = #{member.session_key}")
     Member selectMemberByKey (@Param("member") Member member);
-    @Update("update Member set session_key = #{member.session_key} where id = #{member.id}")
+    @Update("update member set session_key = #{member.session_key} where id = #{member.id}")
     void refreshKey (@Param("member") Member member);
+    @Select("select count(*) from member")
+    int countAllMember();
 }

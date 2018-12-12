@@ -1,15 +1,14 @@
 package com.lyh.controller;
 
-import com.lyh.service.IMemberService;
 import com.lyh.service.IRecordService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
+
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
@@ -18,19 +17,17 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-@ServerEndpoint(value = "/broadcast")
-@Component("myWebSocket")
+@ServerEndpoint(value = "/pushUrl")
+@Component("pushUrlToWechat")
 @CrossOrigin
 @EnableJms
-public class MyWebSocket {
+public class PushUrlToWechat {
     //静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
     private static int onlineCount = 0;
     //concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。
-    private static CopyOnWriteArraySet<MyWebSocket> webSocketSet = new CopyOnWriteArraySet<MyWebSocket>();
+    private static CopyOnWriteArraySet<PushUrlToWechat> webSocketSet = new CopyOnWriteArraySet<PushUrlToWechat>();
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private static String filePath;
-    @Autowired
-    private IRecordService recordService;
     private Session session;  //与某个客户端的连接会话，需要通过它来给客户端发送数据
 
     /**
@@ -52,10 +49,17 @@ public class MyWebSocket {
         subOnlineCount();           //在线数减1
         logger.info("有一连接关闭！当前在线人数为" + getOnlineCount());
     }
-    @JmsListener(destination = "broadcastMsg")
+    @JmsListener(destination = "pushUrl")
     public void receiveQueue(String text) {
         logger.error("websocket中的jms的text" + text);
         setFilePath(text);
+        for (PushUrlToWechat item : webSocketSet) {
+            try {
+                item.sendMessage(getFilePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
     /**
      * 收到客户端消息后调用的方法
@@ -66,9 +70,9 @@ public class MyWebSocket {
         logger.info("来自客户端的消息:" + message);
         //decoderBase64File(message, null, null);
         //群发消息
-        for (MyWebSocket item : webSocketSet) {
+        for (PushUrlToWechat item : webSocketSet) {
             try {
-                item.sendMessage(message + "||" + getFilePath());
+                item.sendMessage(message);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -93,7 +97,7 @@ public class MyWebSocket {
         //this.session.getAsyncRemote().sendText(message);
     }
     public static void sendInfo(String message) throws IOException {
-        for (MyWebSocket item : webSocketSet) {
+        for (PushUrlToWechat item : webSocketSet) {
             try {
                 item.sendMessage(message);
             } catch (IOException e) {
@@ -107,11 +111,11 @@ public class MyWebSocket {
     }
 
     public static synchronized void addOnlineCount() {
-        MyWebSocket.onlineCount++;
+        PushUrlToWechat.onlineCount++;
     }
 
     public static synchronized void subOnlineCount() {
-        MyWebSocket.onlineCount--;
+        PushUrlToWechat.onlineCount--;
     }
 
     public static synchronized  String getFilePath () {
@@ -119,6 +123,6 @@ public class MyWebSocket {
     }
 
     public static synchronized void setFilePath (String filePath) {
-        MyWebSocket.filePath = filePath;
+        PushUrlToWechat.filePath = filePath;
     }
 }

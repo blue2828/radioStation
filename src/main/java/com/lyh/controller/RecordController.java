@@ -47,6 +47,8 @@ public class RecordController {
                 resultMap.put("success", true);
                 Destination destination = new ActiveMQQueue("broadcastMsg");
                 jmsProducer.sendMessage(destination, "d:/fileUpload/".concat(fileName));
+                Destination wx = new ActiveMQQueue("pushUrl");
+                jmsProducer.sendMessage(wx, "d:/fileUpload/".concat(fileName));
             }catch (Exception e) {
                 e.printStackTrace();
                 resultMap.put("success", false);
@@ -73,8 +75,6 @@ public class RecordController {
             file = StringUtil.isEmpty(targetPath) ? null : new File(targetPath);
             long length = file.length();
             response.addHeader("Accept-Ranges", "bytes");
-            response.addHeader("Content-Length", length + "");
-            //response.addHeader("Content-Type", "audio/mpeg;charset=UTF-8");
             response.setHeader("Content-Type", "audio/mpeg");
             in = file == null ? null : new FileInputStream(file);
             bin = in == null ? null : new BufferedInputStream(in);

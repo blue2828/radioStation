@@ -70,4 +70,9 @@ public class MemberDaoImpl implements IMemberDao {
     public void refreshKey(Member member) {
          memberDao.refreshKey(member);
     }
+
+    @Override
+    public int countAllMember() {
+        return memberDao.countAllMember();
+    }
 }

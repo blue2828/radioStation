@@ -10,6 +10,7 @@ public interface IMemberService {
     int insertUser (Member member);
     List<Member> queryMemberAllOrSth (Page page, Member member);
     int countMember (Page page, Member member);
+    int countAllMember ();
     String getImageHeader (int memberId);
     Member checkMember (Member member, boolean isWx);
     int editMember(Member member, String date, boolean isWx);

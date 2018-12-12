@@ -42,6 +42,7 @@ public class MemberController {
                 result.setOpenid(null);
                 result.setSession_key(null);
                 map.put("currentMember", result);
+                session.setMaxInactiveInterval(604800);
                 session.setAttribute("currentMember", result);
                 return map;
             }

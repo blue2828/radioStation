@@ -13,8 +13,10 @@
 </body>
 <script>
     window.onload = function () {
-        document.getElementsByTagName('audio')[0].src = 'http://182.90.10.41:8088/pushRecordStreamByName?fileName=' + 'd:/fileUpload/录音_2018-12-12_1_11_55.amr';
+        var date = {"hh" : "hh", "dd" : "dd", "ss" : "ss"};
+        console.log("对象置换前===" + date.toString());
+        delete date.dd;
+        console.log("置换后====" + date);
     }
-    //document.getElementsByTagName('audio')[0].play();
 </script>
 </html>

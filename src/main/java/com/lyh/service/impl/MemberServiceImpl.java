@@ -54,6 +54,18 @@ public class MemberServiceImpl implements IMemberService {
     }
 
     @Override
+    public int countAllMember() {
+        int count = 0;
+        try {
+            count = memberDao.countAllMember();
+        }catch (Exception e) {
+            count = 0;
+            e.printStackTrace();
+        }
+        return count;
+    }
+
+    @Override
     public String getImageHeader(int memberId) {
         String imgAddr = "";
         try {
