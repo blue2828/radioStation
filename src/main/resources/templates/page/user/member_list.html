@@ -284,12 +284,13 @@
             openFrame([640, 400], '添加用户', $('#infoFrame'));
         });
         $('#search_btn').click(function () {
+
            tbOp.reload({
               url: '../../getMemberInfo',
                where: {
-                   id: $('.s_id').val(),
-                   nickName: $(".nickName").val(),
-                   s_sex: $('.sex').val()
+                   id: $('.s_id').val() == '' ? 0 : $('.s_id').val(),
+                   nickName: $(".nickName").val() ,
+                   s_sex: $('.sex').val() == '' ? -1 : $('.sex').val()
                }
            });
         });

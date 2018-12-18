@@ -11,5 +11,5 @@ public interface IStationService {
     int countStation (Page page);
     boolean updateStationState(Station station);
     Date getLastTime (int id);
-    List<Station> getCurrentStation();
+    List<Station> getCurrentStation(boolean isOnlyQueryBroadcast);
 }

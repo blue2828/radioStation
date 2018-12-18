@@ -4,8 +4,35 @@ import java.util.Date;
 
 public class UserFile implements java.io.Serializable {
     private int id, uploadMemId, type;
-    private String storeAddr, fileName, fileDesc;
+    private String storeAddr, fileName, fileDesc, play_url;
     private Date uploadDate;
+
+    public UserFile(int id, int uploadMemId, String storeAddr, Date uploadDate) {
+        this.id = id;
+        this.uploadMemId = uploadMemId;
+        this.storeAddr = storeAddr;
+        this.uploadDate = uploadDate;
+    }
+
+    public UserFile(int id, int uploadMemId, int type, String storeAddr, String fileName, Date uploadDate) {
+        this.id = id;
+        this.uploadMemId = uploadMemId;
+        this.type = type;
+        this.storeAddr = storeAddr;
+        this.fileName = fileName;
+        this.uploadDate = uploadDate;
+    }
+
+    public UserFile(int id, int uploadMemId, int type, String storeAddr) {
+        this.id = id;
+        this.uploadMemId = uploadMemId;
+        this.type = type;
+        this.storeAddr = storeAddr;
+    }
+
+    public UserFile(String play_url) {
+        this.play_url = play_url;
+    }
 
     public int getId() {
         return id;
@@ -64,6 +91,14 @@ public class UserFile implements java.io.Serializable {
     }
 
     public UserFile() {
+    }
+
+    public String getPlay_url() {
+        return play_url;
+    }
+
+    public void setPlay_url(String play_url) {
+        this.play_url = play_url;
     }
 
     public UserFile(int id) {

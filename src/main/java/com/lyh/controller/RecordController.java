@@ -1,10 +1,17 @@
 package com.lyh.controller;
 
+import com.lyh.entity.Member;
+import com.lyh.entity.Page;
+import com.lyh.entity.Record;
+import com.lyh.entity.Station;
 import com.lyh.service.IRecordService;
+import com.lyh.service.IStationService;
 import com.lyh.service.message.JmsProducer;
 import com.lyh.util.StringUtil;
 import com.lyh.util.mediaUtil;
 import org.apache.activemq.command.ActiveMQQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -17,8 +24,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.jms.Destination;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.*;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -30,9 +40,15 @@ public class RecordController {
     private JmsProducer jmsProducer;
     @Autowired
     private IRecordService recordService;
-    @RequestMapping("/testFileUpload")
+    @Autowired
+    private IStationService stationService;
+    @Autowired
+    private StringUtil stringUtil;
+
+    private static Logger logger = LoggerFactory.getLogger(RecordController.class);
+    @RequestMapping("/recordUpload")
     @ResponseBody
-    public Map<String, Object> testFileUpload (@RequestParam(value="file", required = false) MultipartFile multipartFile) {
+    public Map<String, Object> recordUpload (@RequestParam(value="file", required = false) MultipartFile multipartFile, HttpSession session) {
         String name = "";
         String fileName = "";
         String fileType = "";
@@ -41,18 +57,29 @@ public class RecordController {
             fileName = multipartFile.getOriginalFilename();
             fileType = fileName.substring(fileName.lastIndexOf("."));
             fileName = StringUtil.mkRecordName("录音", fileType);
-            File file = new File("d:/fileUpload/".concat(fileName));
+            String storeAddr = "d:/fileUpload/".concat(fileName);
+            File file = new File(storeAddr);
+            Member member = (Member) session.getAttribute("currentAppMember");
+            List<Station> info = stationService.queryStation(new Page(1, 30));
+            Date time = stringUtil.formatStrTimeToDate(stringUtil.getCurrentTimeStr(), "yyyy-MM-dd HH:mm:ss");
+            Record record = new Record(info.get(0).getId(), member.getId(), fileName, storeAddr, time);
+            boolean flag = recordService.saveRecord(record);
             try {
                 multipartFile.transferTo(file);
-                resultMap.put("success", true);
-                Destination destination = new ActiveMQQueue("broadcastMsg");
-                jmsProducer.sendMessage(destination, "d:/fileUpload/".concat(fileName));
+                if (flag) {
+                    resultMap.put("success", true);
+                    logger.info("录音文件地址及信息存入数据库成功");
+                }else
+                    logger.error("录音文件地址及信息存入数据库失败");
                 Destination wx = new ActiveMQQueue("pushUrl");
-                jmsProducer.sendMessage(wx, "d:/fileUpload/".concat(fileName));
+                jmsProducer.sendMessage(wx, storeAddr);
+                Destination destination = new ActiveMQQueue("broadcastMsg");
+                jmsProducer.sendMessage(destination, storeAddr);
             }catch (Exception e) {
                 e.printStackTrace();
                 resultMap.put("success", false);
                 resultMap.put("success", "录音上传失败");
+                logger.error("录音文件存入磁盘失败");
             }
         }else {
             resultMap.put("success", false);

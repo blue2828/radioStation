@@ -122,8 +122,23 @@ public class FileController {
         userFile.setUploadMemId(-1);
         userFile.setType(-1);
         List<UserFile> list = fileServiceImpl.getAllFiles(userFile, new Page(1, 30));
-        //response.setContentType("multipart/form-data");
-       // response.setHeader("Content-Disposition", "attachment;fileName=" + list.get(0).getStoreAddr().substring(list.get(0).getStoreAddr().indexOf("_") + 1));
+        UserFile tempFile = list.get(0);
+        if (null != tempFile.getPlay_url()) {
+            if (tempFile.getPlay_url().indexOf("kugou.com") > -1) {
+                PrintWriter writer = null;
+                try {
+                    writer = response.getWriter();
+                    writer.println(list.get(0).getPlay_url());
+                    writer.flush();
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }finally {
+                    if (null != writer)
+                        writer.close();
+                }
+                return;
+            }
+        }
         File file = new File(list.get(0).getStoreAddr());
         if (isMusic) {
             long length = file.length();

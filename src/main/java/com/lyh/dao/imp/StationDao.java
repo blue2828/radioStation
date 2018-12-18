@@ -33,7 +33,7 @@ public class StationDao implements IStationDao {
     }
 
     @Override
-    public  List<Station> getCurrentStation() {
-        return stationDao.getCurrentStation();
+    public  List<Station> getCurrentStation(boolean isOnlyQueryBroadcast) {
+        return stationDao.getCurrentStation(isOnlyQueryBroadcast);
     }
 }

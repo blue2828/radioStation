@@ -43,7 +43,7 @@ public interface IMemberDao {
     void refreshDate (@Param("lastTimeLogin") String lastTimeLogin, @Param("id") int id );
     @Delete("delete from member where id = #{id}")
     void delMember (@Param("id") int id);
-    @Delete("update member set sessionKey = NULL where id = #{id}")
+    @Delete("update member set session_Key = NULL where id = #{id}")
     void delSessionKey (@Param("id") int id);
     @Select("SELECT MAX(id) FROM member")
     int selectMaxId ();

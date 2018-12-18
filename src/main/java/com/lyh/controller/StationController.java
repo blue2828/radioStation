@@ -59,7 +59,7 @@ public class StationController {
     @ResponseBody
     public JSONObject getCurrentCastInfo() {
         JSONObject jsonObject = new JSONObject();
-        List<Station> info = stationService.getCurrentStation();
+        List<Station> info = stationService.getCurrentStation(true);
         JSONArray array = info.size() > 0 ? stringUtil.formatListToJson(info) : null;
         jsonObject.put("result", array);
         return jsonObject;

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>选取歌曲文件</title>
+    <link rel="stylesheet" href="../common/css/mui.min.css"/>
+</head>
+<body>
+    <input type="file" name="file" id="file" style="display: none;">
+    <div id="container" style="background: white;">
+        <img id="img" src="../images/file-add.png" style="margin: 20px 0 0 100px;width: 128px; height: 128px;">
+        <div id="preview" style="text-align: center;margin-top: 20px;">
+
+        </div>
+    </div>
+    <button style="margin-left: 100px;" type="button" class="mui-btn mui-btn-primary previewBtn">预览</button>
+    <button type="button" class="mui-btn mui-btn-danger doUpload">确定上传</button>
+    <div class="audio" style="position: absolute;display: none; left: 20px; top: 50px;">
+        <div class="closeMusicBtn" style="background-color: #F1F3F4;cursor: pointer;width: 17px;height: 17px; margin-left: 92%;"><img class="closeImg" width="16" height="16" src="../images/closeBtn.png"></div>
+        <audio id="player" preload="auto" src="" controls="controls" autoplay />
+    </div>
+    <div class="mui-card prewContainer" style="position: fixed; top: 50px;z-index: 100000;width: 90%; display: none;">
+        <!--页眉，放置标题-->
+        <div class="mui-card-header">预览效果</div>
+        <!--内容区-->
+        <div class="mui-card-content">内容区</div>
+            <iframe style="display: none;" id="pdfIframe"></iframe>
+            <p class="content"></p>
+        <div class="mui-card-footer" style="padding-left: 80%">
+            <a href="#" class="mui-btn mui-btn-danger mui-closeBtn" >关闭</a>
+        </div>
+    </div>
+
+</body>
+    <script type="text/javascript" src="../common/js/mui.min.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.min.js"></script>
+    <script type="text/javascript" src="../common/js/ajaxFileUpload.js"></script>
+    <script>
+        mui.init();
+        var ws = new WebSocket ("ws://182.90.7.59:8088/pushUrl");
+        var mask = mui.createMask(() => {
+
+        });//callback为用户点击蒙版时自动执行的回调；
+        ws.onopen = function () {
+            console.log('已连接到websocket');
+        };
+        ws.onmessage = function (message) {
+            console.log(message.data);
+        }
+        ws.onclose = function () {
+            console.log("断开websocket连接");
+        }
+        setShow(0);
+        setPdfFrameShow(0);
+        var url = location.href;
+        var args = url.split('?')[1].split('&');
+        var type = args[0].substring(args[0].indexOf('=') + 1);
+        var memberId = args[1].substring(args[1].indexOf('=') + 1);
+        switch (type) {
+            case 'song' :
+                document.querySelector("#preview").innerHTML = '上传歌曲文件（可选，以备主播找不到资源时使用播放)';
+                break;
+            default:
+                document.querySelector("#preview").innerHTML = '上传pdf或者txt文件';
+                break;
+        }
+        var filePath = '';
+        var uploadFileType = '';
+        document.querySelector('#container').addEventListener('tap', () => {
+            document.querySelector("#file").click();
+        }, false);
+        document.querySelector("#file").addEventListener('change', onchange, false);
+        function onchange () {
+            fileName = document.querySelector('#file').value.substring(document.querySelector('#file').value.lastIndexOf("\\") + 1);
+            document.querySelector('#preview').innerHTML = fileName;
+            var fileType = fileName.substring(fileName.lastIndexOf("."));
+            let typeFilter = "";
+            switch (type) {
+                case "song" :
+                    typeFilter = ".mp3|.amr|.flac|.wav";
+                    break;
+                case "article" :
+                    typeFilter = ".txt|.pdf";
+                    break;
+            }
+            var arr = typeFilter.split("|").filter((value, index) => {
+                return value == fileType;
+            });
+            switch (arr.length) {
+                case 0 :
+                    type == 'song'? mui.alert('文件类型不正确，请选择正确的格式（支持mp3,amr,flac,war）', '警告') :
+                        mui.alert('文件类型不正确，请选择正确的格式（支持txt,pdf）', '警告');
+                    setShow(0);
+                    break;
+                default :
+                    type == 'song'? document.querySelector('#img').src = '../images/customerservice.png':
+                        arr[0] == 'pdf' ? document.querySelector('#img').src = '../images/file-pdf.png' :
+                            document.querySelector('#img').src = '../images/file-text.png';
+                    filePath = getFilePath(document.querySelector('#file').files[0]);
+                    uploadFileType = fileType;
+                    setShow(1);
+            }
+
+        }
+        function getFilePath (file) {
+            var url = '';
+            if (null != window.createObjectURL)
+                url = window.createObjectURL(file);
+            else if (null != window.URL)
+                url = window.URL.createObjectURL(file);
+            else if (null != window.webkitURL )
+                url = window.webkitURL.createObjectURL(file);
+            return url;
+
+        }
+        function setAudioShow (version) {
+            switch (version) {
+                case 0 :
+                    document.querySelector('.audio').style.display = 'none';
+                    break;
+                case 1 :
+                    document.querySelector('.audio').style.display = 'block';
+                    break;
+            }
+        }
+        function setPdfFrameShow (version) {
+            switch (version) {
+                case 0 :
+                    document.querySelector('#pdfIframe').style.display = 'none';
+                    break;
+                case 1 :
+                    document.querySelector('#pdfIframe').style.display = 'block';
+                    document.querySelector('.prewContainer').style.width = window.outerWidth + 'px';
+                    document.querySelector('.prewContainer').style.height = window.outerHeight + 'px';
+                    document.querySelector('#pdfIframe').style.width = window.outerWidth + 'px';
+                    document.querySelector('#pdfIframe').style.height = window.outerHeight - 60 + 'px';
+                    document.querySelector('#pdfIframe').src = "../pdf/web/viewer.html?file="+ encodeURIComponent(filePath);
+            }
+        }
+        function setShow (version) {
+            switch (version) {
+                case 0 :
+                    document.querySelectorAll('button').forEach((value, index) => {
+                        value.style.display = 'none';
+                    })
+                    break;
+                case 1 :
+                    document.querySelectorAll('button').forEach((value, index) => {
+                        value.style.display = 'inline';
+                    })
+                    break;
+            }
+        }
+        document.querySelector('.closeMusicBtn').addEventListener('tap', () => {
+            setAudioShow(0)
+            document.querySelector('#player').pause();
+        });
+        document.querySelector('.previewBtn').addEventListener('tap', () => {
+            switch (uploadFileType) {
+                case ".pdf" :
+                    document.querySelector('.prewContainer').style.display = 'block';
+                    setPdfFrameShow(1);
+                    document.querySelector("#pdfIframe").innerHTML = '';
+                    mask.show();
+                    break;
+                case ".txt" :
+                    setPdfFrameShow(0);
+                    mask.show();
+                    document.querySelector('.prewContainer').style.display = 'block';
+                    var reader = new FileReader();
+                    reader.readAsText(document.querySelector('#file').files[0], 'gb2312');
+                    reader.onloadend = (e) => {
+                        document.querySelector(".content").innerText = e.target.result;
+                    };
+                    break;
+                default :
+                    setAudioShow(1);
+                    document.querySelector('#player').src = filePath;
+                    document.querySelector('#player').play();
+            }
+
+        });
+        document.querySelector('.mui-closeBtn').addEventListener('tap', () => {
+            document.querySelector('.prewContainer').style.display = 'none';
+            mask.close();
+        });
+        document.querySelector(".doUpload").addEventListener('tap', () => {
+            $.ajaxFileUpload ({
+                url: '../wxUploadFile?type=' + uploadFileType + '&memberId=' + memberId,
+                fileElementId: 'file',
+                dataType: 'json',
+                contentType: 'application/x-www-form-urlencoded;charset=utf-8',
+                success: function (res) {
+                    if (res.success) {
+                        mui.toast('上传成功');
+                        ws.send(uploadFileType + "&" + fileName);
+                        ws.send("fileId:" + res.fileId);
+                    }
+                    else
+                        mui.toast('上传失败');
+                },
+                error: function () {
+                    mui.toast('服务器请求失败');
+                }
+            });
+        });
+    </script>
+</html>

@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 @Repository("fileDao")
-@Transactional
 public class FileDaoImpl implements IFileDao {
     @Autowired
     private IFileDao fileDao;
@@ -31,7 +30,22 @@ public class FileDaoImpl implements IFileDao {
 
     @Override
     public void saveFile(UserFile userFile) {
+        fileDao.saveFile(userFile);
+    }
 
+    @Override
+    public int selectMaxId() {
+        return fileDao.selectMaxId();
+    }
+
+    @Override
+    public void updateFilePlayUrl(UserFile userFile) {
+        fileDao.updateFilePlayUrl(userFile);
+    }
+
+    @Override
+    public UserFile getFileById(int fileId) {
+        return fileDao.getFileById(fileId);
     }
 
 

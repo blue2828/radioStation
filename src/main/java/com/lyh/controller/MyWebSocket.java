@@ -1,7 +1,9 @@
 package com.lyh.controller;
 
-import com.lyh.service.IMemberService;
 import com.lyh.service.IRecordService;
+import com.lyh.service.message.JmsProducer;
+import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.command.ActiveMQTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,8 @@ import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
+
+import javax.jms.Destination;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
@@ -32,7 +36,9 @@ public class MyWebSocket {
     @Autowired
     private IRecordService recordService;
     private Session session;  //与某个客户端的连接会话，需要通过它来给客户端发送数据
-
+    @Autowired
+    @Qualifier("jmsProducer")
+    public static JmsProducer jmsProducer;
     /**
      * 连接建立成功调用的方法*/
     @OnOpen
@@ -55,6 +61,13 @@ public class MyWebSocket {
     @JmsListener(destination = "broadcastMsg")
     public void receiveQueue(String text) {
         logger.error("websocket中的jms的text" + text);
+        for (MyWebSocket item : webSocketSet) {
+            try {
+                item.sendMessage(text);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         setFilePath(text);
     }
     /**
@@ -65,6 +78,7 @@ public class MyWebSocket {
     public void onMessage(String message, Session session) throws Exception{
         logger.info("来自客户端的消息:" + message);
         //decoderBase64File(message, null, null);
+        jmsProducer.sendMessage(new ActiveMQQueue("pushUrl"), message);
         //群发消息
         for (MyWebSocket item : webSocketSet) {
             try {

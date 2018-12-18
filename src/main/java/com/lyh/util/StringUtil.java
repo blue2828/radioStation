@@ -42,6 +42,12 @@ public class StringUtil {
                             tempJb.put("birthday", this.formatTime(((Member) list.get(i)).getBirthday(), "yyyy-MM-dd"));
                         else if (fieldName.equals("sex"))
                             tempJb.put("sex", EnumUtil.formatIntSexToStr(((Member) list.get(i)).getSex()));
+                    else if (fieldName.equals("userFile")) {
+                            tempJb.put("fileEntityId", ((DemandList)list.get(i)).getUserFile().getId());
+                            tempJb.put("storeAddr", !StringUtil.isEmpty((((DemandList)list.get(i)).getUserFile().getStoreAddr())) ? ((DemandList)list.get(i)).getUserFile().getStoreAddr() : "" );
+                            tempJb.put("play_url", (!StringUtil.isEmpty(((DemandList)list.get(i)).getUserFile().getPlay_url())) ? ((DemandList)list.get(i)).getUserFile().getPlay_url() : "");
+                            tempJb.put("type", EnumUtil.formatIntTypeToStr(((DemandList)list.get(i)).getUserFile().getType()));
+                        }
                         else if (fieldName.equals("createTime"))
                             tempJb.put("createTime", this.formatTime(((Record) list.get(i)).getCreateTime(), "yyyy-MM-dd HH:mm:ss"));
                         else if (fieldName.equals("stationState"))
@@ -68,9 +74,10 @@ public class StringUtil {
                           else if (fieldName.equals("uploadMemId")) {
                             List<Member> listMember = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(((UserFile) list.get(i)).getUploadMemId(), -1));
                             tempJb.put("uploadMemId", listMember.size() > 0 ? listMember.get(0).getUserName() : "");
+                         }else {
+                            Object tempOb = this.getFieldValueByName(fieldName, list.get(i));
+                                tempJb.put(fieldName, tempOb != null ? tempOb : "");
                          }
-                            else
-                                tempJb.put(fieldName, this.getFieldValueByName(fieldName, list.get(i)));
                 }
                 array.add(tempJb);
             }
@@ -167,5 +174,42 @@ public class StringUtil {
     }
     public static String mkRecordName (String fileName, String type) {
         return fileName = fileName.concat("_").concat(new StringUtil().getCurrentTimeStr().replaceAll(" ", "_").replaceAll(":", "_")).concat(type);
+    }
+    public static boolean isOsWindows () {
+        boolean flag = true;
+        Properties properties = new Properties();
+        String osName = properties.getProperty("os.name");
+        flag = !StringUtil.isEmpty(osName) && osName.toLowerCase().indexOf("linux") > -1 ? false : true;
+        return flag;
+    }
+    public static int formatStrFileTypeToInt (String type) {
+        int result = 0;
+        type = type.substring(type.indexOf(".") + 1);
+        switch (type) {
+            case "pdf" :
+                result = 1;
+                break;
+            case "txt" :
+                result = 1;
+                break;
+            default :
+                String imgFilter = "jpeg|gif|jpg|png|bmp|pic|";
+                String[] imgFilters = imgFilter.split("\\|");
+                int count = 0;
+                for (String temp : imgFilters) {
+                    if (type.equalsIgnoreCase(temp)) {
+                        result = 2;
+                        break;
+                    }
+                    if (!type.equalsIgnoreCase(temp) && count == imgFilters.length - 1)
+                        result = 0;
+                    count ++;
+                }
+        }
+        return result;
+    }
+    public static void main(String[] args) {
+
+        System.out.println(new StringUtil().getCurrentTimeStr());
     }
 }

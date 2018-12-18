@@ -68,7 +68,7 @@
                             $(value).html("<img style='width: 100px;' title='点击可预览' onclick='preview(this)' src='../../images/txt.jpg' class='imgHeader'>");
                             break;
                         default :
-                            let strFilter=".jpeg|.gif|.jpg|.png|.bmp|.pic|";
+                            let strFilter = ".jpeg|.gif|.jpg|.png|.bmp|.pic|";
                             let arr = strFilter.split("|", 6);
                             $.each(arr, (item, itemValue) => {
                                 if ("." + fileType == itemValue) {
@@ -115,11 +115,6 @@
                             data: {fileId: $(obj).parent().prev().prev().prev().text(), isTxt : true},
                             contentType: "text/html;charset=utf-8",
                             success : function(res) {
-                                /*var reg = /^[\t\n\r\s]/;
-                                if(reg.test(res)) {
-                                    res = res.substring(0, res.indexOf($.trim(res).substring(0, 1)) + $.trim(res).length);
-                                    alert(true);
-                                }*/
                                 $('.prewViewTxt').find('pre:eq(0)').text(res);
                             }
                         });
@@ -143,6 +138,18 @@
                             }else {
                                 if (item == 5) {
                                     $('.audio').css('display', 'block');
+                                    var storeAddr = $(obj).parent().next().next().next().text();
+                                    if (storeAddr.indexOf(".") == -1) {
+                                        $.ajax({
+                                            url: '../../previewFile',
+                                            dataType: "text",
+                                            data: {fileId: $(obj).parent().prev().prev().prev().text(), isMusic : true},
+                                            contentType: "text/json;charset=utf-8",
+                                            success : function(res) {
+                                                document.querySelector("#player").src = res;
+                                            }
+                                        });
+                                    }
                                     document.querySelector("#player").src = '../../previewFile?fileId=' + $(obj).parent().prev().prev().prev().text() + "&isMusic=true";
                                 }
                             }

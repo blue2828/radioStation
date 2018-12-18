@@ -41,9 +41,11 @@ public class MemberController {
                 result.setPwd(null);
                 result.setOpenid(null);
                 result.setSession_key(null);
-                map.put("currentMember", result);
+                map.put("currentAppMember", result);
                 session.setMaxInactiveInterval(604800);
-                session.setAttribute("currentMember", result);
+                session.setAttribute("currentAppMember", result);
+                map.put("cookie_id", session.getId());
+
                 return map;
             }
         }
@@ -54,6 +56,7 @@ public class MemberController {
             }else {
                 map.put("success", true);
                 session.setAttribute("currentMember", result);
+                map.put("cookie_id", session.getId());
             }
         }else {
             map.put("success", false);
@@ -179,15 +182,20 @@ public class MemberController {
 
     @RequestMapping("/getCurrentMember")
     @ResponseBody
-    public JSONObject getCurrentMember (HttpSession session) {
-        Member currentMember = (Member) session.getAttribute("currentMember");
+    public JSONObject getCurrentMember (HttpSession session, String isApp) {
+
+        Member currentMember = StringUtil.isEmpty(isApp) ? (Member) session.getAttribute("currentMember") :
+                (Member) session.getAttribute("currentAppMember");
         JSONObject result = new JSONObject();
         if (currentMember == null) {
             result.put("currentMember", null);
             return result;
         }
         List<Member> list = memberService.queryMemberAllOrSth(new Page(1, 30), new Member(currentMember.getId(), -1));
-        result.put("currentMember", stringUtil.formatListToJson(list));
+        if (StringUtil.isEmpty(isApp))
+            result.put("currentMember", stringUtil.formatListToJson(list));
+        else
+            result.put("currentAppMember", stringUtil.formatListToJson(list));
         if (list.size() > 0) {
             if (null == list.get(0).getLastTimeLogin())
                 result.put("lastTimeLogin", "此次为第一次登录");

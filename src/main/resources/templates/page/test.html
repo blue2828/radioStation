@@ -5,18 +5,18 @@
     <title>Title</title>
 </head>
 <body>
-    <div id="message"></div>
-    <audio preload="auto"  controls="controls">
-        <source src="">
-        您的浏览器不支持 video 标签。
-    </audio>
+    <input type="file" id="file">
+    <button type="button" id="btn">预览</button>
+    <div id="preview"></div>
 </body>
+<script type="text/javascript" src="../common/js/jquery.min.js"></script>
 <script>
-    window.onload = function () {
-        var date = {"hh" : "hh", "dd" : "dd", "ss" : "ss"};
-        console.log("对象置换前===" + date.toString());
-        delete date.dd;
-        console.log("置换后====" + date);
-    }
+    var fileReader = new FileReader();
+    document.querySelector('#btn').addEventListener('click', () => {
+       fileReader.readAsText( document.querySelector('#file').files[0], 'gb2312');
+       fileReader.onloadend = function (e) {
+           document.querySelector('#preview').innerHTML = e.target.result;
+       };
+    });
 </script>
 </html>

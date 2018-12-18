@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>选取歌曲文件</title>
+    <link rel="stylesheet" href="../common/css/mui.min.css"/>
+</head>
+<body>
+    <div class="mui-card prewContainer" >
+        <!--页眉，放置标题-->
+        <div class="mui-card-header">预览效果</div>
+        <!--内容区-->
+        <div class="mui-card-content">内容区</div>
+            <iframe style="display: none;" id="pdfIframe"></iframe>
+            <p class="content"></p>
+        <div class="mui-card-footer" style="padding-left: 80%">
+        </div>
+    </div>
+
+</body>
+    <script type="text/javascript" src="../common/js/mui.min.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.min.js"></script>
+    <script>
+        mui.init();
+        let mask = mui.createMask(() => {});
+        let url = location.href;
+        let args = url.split("?")[1];
+        args = args.split("&");
+        let fileType = args[0].substring(args[0].indexOf("=") + 1);
+        let fileId = args[1].substring(args[1].indexOf("=") + 1);
+        var flag = fileType.indexOf("pdf");
+        switch (flag > -1) {
+            case  true :
+                setPdfFrameShow(1);
+                setTextShow(0);
+                break;
+            default :
+                setPdfFrameShow(0);
+                setTextShow(1);
+        }
+        function setPdfFrameShow(version) {
+            switch (version) {
+                case 0 :
+                    document.querySelector("#pdfIframe").style.display = 'none';
+                    document.querySelector('#pdfIframe').src = '';
+                    break;
+                case 1 :
+                    document.querySelector('#pdfIframe').src = "../pdf/web/viewer.html?file="+ encodeURIComponent('../../previewFile?fileId=' + fileId);
+                    document.querySelector("#pdfIframe").style.display = 'block';
+                    document.querySelector('.prewContainer').style.width = window.outerWidth + 'px';
+                    document.querySelector('.prewContainer').style.height = window.outerHeight - 60 + 'px';
+                    document.querySelector('#pdfIframe').style.width = window.outerWidth + 'px';
+                    document.querySelector('#pdfIframe').style.height = window.outerHeight - 60 + 'px'
+                    break;
+            }
+        }
+        function setTextShow(version) {
+            switch (version) {
+                case 0 :
+                    document.querySelector('.content').style.display = 'none';
+                    document.querySelector('.content').innerText = '';
+                    break;
+                case 1 :
+                    $.ajax({
+                        url: '../../previewFile',
+                        dataType: "text",
+                        data: {fileId: fileId, isTxt: true},
+                        contentType: "text/html;charset=utf-8",
+                        success : function(res) {
+                            document.querySelector('.content').innerText = res;
+                        }
+                    });
+                    document.querySelector('.content').style.display = 'block';
+                    break;
+            }
+        }
+    </script>
+</html>

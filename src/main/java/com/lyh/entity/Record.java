@@ -7,6 +7,14 @@ public class Record implements java.io.Serializable {
     private String name, storeAddr;
     private Date createTime;
 
+    public Record(int stationId, int memberId, String name, String storeAddr, Date createTime) {
+        this.stationId = stationId;
+        this.memberId = memberId;
+        this.name = name;
+        this.storeAddr = storeAddr;
+        this.createTime = createTime;
+    }
+
     public int getId() {
         return id;
     }

@@ -64,10 +64,10 @@ public class StationService implements IStationService{
     }
 
     @Override
-    public  List<Station> getCurrentStation() {
+    public  List<Station> getCurrentStation(boolean isOnlyQueryBroadcast) {
         List<Station> result = null;
         try {
-            result = stationDao.getCurrentStation();
+            result = stationDao.getCurrentStation(isOnlyQueryBroadcast);
         }catch (Exception e) {
             result = null;
             e.printStackTrace();
