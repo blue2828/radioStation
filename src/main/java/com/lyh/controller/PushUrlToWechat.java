@@ -70,9 +70,12 @@ public class PushUrlToWechat {
         logger.info("来自客户端的消息:" + message);
         //decoderBase64File(message, null, null);
         //群发消息
+
+        int count = 0;
         for (PushUrlToWechat item : webSocketSet) {
             try {
                 item.sendMessage(message);
+                count ++;
             } catch (IOException e) {
                 e.printStackTrace();
             }

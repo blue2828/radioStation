@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>选取歌曲文件</title>
+    <link rel="stylesheet" href="../common/css/mui.min.css"/>
+</head>
+<body>
+<div id="container">
+
+</div>
+</body>
+    <script type="text/javascript" src="../common/js/mui.min.js"></script>
+    <script type="text/javascript" src="../common/js/jquery.min.js"></script>
+    <script type="text/javascript">
+        mui.init();
+        let resource = `[00:00.10]好听 - 许茹芸[00:00.20]词:吴克群[00:00.30]曲:吴克群[00:20.18]你说的话 我都相信[00:24.98]说得好听 说得甜蜜[00:29.87]你说的每一句 我都相信[00:40.02]为了爱情 失了聪明[00:44.77]听你的话 闭上眼睛[00:49.78]这个梦多美丽 让它继续[00:59.65]你说的话总那么好听[01:04.52]你爱不爱我不能确定[01:09.59]也许你只把他当游戏[01:14.41]我却爱得太用力[01:39.25]你说的话我都相信[01:44.12]说得好听说得甜蜜[01:49.10]你说的每一句我都相信[01:59.06]为了爱情 失了聪明[02:03.97]听你的话 闭上眼睛[02:08.91]这个梦多美丽 让它继续[02:18.71]你说的话总那么好听[02:23.63]你爱不爱我不能确定[02:28.65]也许你只把爱当游戏[02:33.56]我却没那么聪明[02:38.57]你说的话总那么好听[02:43.51]你爱不爱我不想确定[02:48.56]我会关掉你送的手机[02:53.42]然后静静不去理[02:58.90]你说的话总那么好听[03:03.44]你爱不爱我不想确定[03:08.46]我会关掉你送的手机[03:13.49]然后静静 静静[03:18.80]是再也不去理`;
+       let reg = /\[{1}[0-9]{2}:[0-9]{2}\.[0-9]{2}\]{1}/g;
+        let lyrics = resource.replace(reg, "\r\n");
+        console.log('===匹配成功?=' + reg.test(resource));
+        console.log(lyrics);
+    </script>
+</html>

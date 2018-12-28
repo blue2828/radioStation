@@ -1,9 +1,9 @@
 package com.lyh.dao;
 
-import com.lyh.entity.DemandList;
-import com.lyh.entity.Member;
+import com.lyh.entity.*;
 import org.apache.ibatis.annotations.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @Mapper
@@ -23,5 +23,7 @@ public interface IDemandDao {
                     one = @One(select = "com.lyh.dao.IFileDao.getFileById"))
     })
     List<DemandList> getSelfDemand (@Param("memberId") int memberId);
-
+    public List getAllNotBroadcastDemandList ();
+    @Select("select state from demandlist where id = #{id}")
+    public int getStateById (@Param("id") int id);
 }

@@ -53,4 +53,16 @@ public interface IMemberDao {
     void refreshKey (@Param("member") Member member);
     @Select("select count(*) from member")
     int countAllMember();
+    @Update("update member set imageHeaderAddr = #{member.imageHeaderAddr} where id = #{member.id}")
+    int onlyRefreshImg (@Param("member") Member member);
+    @Update("<script>" +
+            "UPDATE member SET wechatNo = NULL <if test=\"member.userName != null\">,userName = #{member.userName}</if>" +
+            "<if test=\"member.birthday != null\">,birthday = #{member.birthday}</if>" +
+            "<if test=\"member.sex != -1\">,sex = #{member.sex}</if>" +
+            "<if test=\"member.phone != null\">,phone = #{member.phone}</if>" +
+            "<if test=\"member.email != null\">,email = #{member.email}</if>" +
+            "<if test=\"member.nickName != null\">,nickName = #{member.nickName}</if>" +
+            "<if test=\"member.label != null\">,label = #{member.label}</if> where id = #{member.id}" +
+            "</script>")
+    int updateMemberByCondition (@Param("member") Member member);
 }

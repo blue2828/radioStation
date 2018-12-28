@@ -8,4 +8,6 @@ public interface IDemandService {
     public boolean saveDemandList(DemandList list);
     boolean updateDemandList (DemandList list, boolean onlyUpdateState);
     List<DemandList> getSelfDemand (int memberId);
+    public List<Object> getAllNotBroadcastDemandList ();
+    public int getStateById (int id);
 }

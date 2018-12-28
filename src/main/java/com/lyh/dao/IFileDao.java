@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 @Mapper
 public interface IFileDao {
-
     @Select("<script>select * from userfile where 1 = 1 <if test=\"userFile.fileName != null\"> and fileName like " +
             "concat('%', #{userFile.fileName}, '%')</if><if test=\"userFile.uploadMemId != -1\"> and uploadMemId = #{userFile.uploadMemId}</if>" +
             "<if test=\"userFile.type != -1\"> and type = #{userFile.type}</if> <if test=\"userFile.id != -1\"> and id = #{userFile.id}</if>" +
@@ -34,4 +33,5 @@ public interface IFileDao {
     void updateFilePlayUrl (@Param("userFile") UserFile userFile);
     @Select("select * from userfile where id = #{id}")
     UserFile getFileById (@Param("id") int id);
+
 }

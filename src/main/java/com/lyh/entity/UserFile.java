@@ -30,6 +30,14 @@ public class UserFile implements java.io.Serializable {
         this.storeAddr = storeAddr;
     }
 
+    public UserFile(int type, String storeAddr, String fileName, String play_url, Date uploadDate) {
+        this.type = type;
+        this.storeAddr = storeAddr;
+        this.fileName = fileName;
+        this.play_url = play_url;
+        this.uploadDate = uploadDate;
+    }
+
     public UserFile(String play_url) {
         this.play_url = play_url;
     }

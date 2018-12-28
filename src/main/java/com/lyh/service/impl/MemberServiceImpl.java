@@ -4,7 +4,6 @@ import com.lyh.dao.IMemberDao;
 import com.lyh.entity.Member;
 import com.lyh.entity.Page;
 import com.lyh.service.IMemberService;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -168,6 +167,32 @@ public class MemberServiceImpl implements IMemberService {
         try {
             memberDao.refreshKey(member);
             flag = 1;
+        }catch (Exception e) {
+            flag = 0;
+            e.printStackTrace();
+        }
+        return flag;
+    }
+
+    @Override
+    @Transactional
+    public int onlyRefreshImg(Member member) {
+        int flag = 0;
+        try {
+            flag = memberDao.onlyRefreshImg(member);
+        }catch (Exception e) {
+            flag = 0;
+            e.printStackTrace();
+        }
+        return flag;
+    }
+
+    @Override
+    @Transactional
+    public int updateMemberByCondition(Member member) {
+        int flag = 0;
+        try {
+            flag = memberDao.updateMemberByCondition(member);
         }catch (Exception e) {
             flag = 0;
             e.printStackTrace();

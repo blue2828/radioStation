@@ -1,5 +1,7 @@
 package com.lyh.controller;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.lyh.entity.Member;
 import com.lyh.entity.Page;
 import com.lyh.entity.Record;
@@ -26,10 +28,7 @@ import javax.jms.Destination;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @CrossOrigin
@@ -101,7 +100,7 @@ public class RecordController {
                 mediaUtil.changeToMp3(fileName, targetPath);
             file = StringUtil.isEmpty(targetPath) ? null : new File(targetPath);
             long length = file.length();
-            response.addHeader("Accept-Ranges", "bytes");
+            //response.addHeader("Accept-Ranges", "bytes");
             response.setHeader("Content-Type", "audio/mpeg");
             in = file == null ? null : new FileInputStream(file);
             bin = in == null ? null : new BufferedInputStream(in);
@@ -131,5 +130,21 @@ public class RecordController {
                     e.printStackTrace();
                 }
         }
+    }
+    @RequestMapping("/getAllRecordList")
+    @ResponseBody
+    public JSONObject getAllRecordList () {
+        JSONObject jsonObject = new JSONObject ();
+        List list = recordService.getAllRecordList();
+        Iterator it = list.iterator();
+        while (it.hasNext()) {
+            ArrayList<JSONArray> list2 = (ArrayList<JSONArray>) it.next();
+            for (JSONArray temp : list2) {
+                jsonObject.put("recordList", temp);
+            }
+        }
+        if (jsonObject.size() == 0)
+            jsonObject.put("recordList", null);
+        return jsonObject;
     }
 }

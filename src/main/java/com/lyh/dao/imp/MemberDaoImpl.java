@@ -75,4 +75,14 @@ public class MemberDaoImpl implements IMemberDao {
     public int countAllMember() {
         return memberDao.countAllMember();
     }
+
+    @Override
+    public int onlyRefreshImg(Member member) {
+        return memberDao.onlyRefreshImg(member);
+    }
+
+    @Override
+    public int updateMemberByCondition(Member member) {
+        return memberDao.updateMemberByCondition(member);
+    }
 }

@@ -13,6 +13,8 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.text.SimpleDateFormat;
 import java.util.*;
 @Component
@@ -43,10 +45,14 @@ public class StringUtil {
                         else if (fieldName.equals("sex"))
                             tempJb.put("sex", EnumUtil.formatIntSexToStr(((Member) list.get(i)).getSex()));
                     else if (fieldName.equals("userFile")) {
-                            tempJb.put("fileEntityId", ((DemandList)list.get(i)).getUserFile().getId());
-                            tempJb.put("storeAddr", !StringUtil.isEmpty((((DemandList)list.get(i)).getUserFile().getStoreAddr())) ? ((DemandList)list.get(i)).getUserFile().getStoreAddr() : "" );
-                            tempJb.put("play_url", (!StringUtil.isEmpty(((DemandList)list.get(i)).getUserFile().getPlay_url())) ? ((DemandList)list.get(i)).getUserFile().getPlay_url() : "");
-                            tempJb.put("type", EnumUtil.formatIntTypeToStr(((DemandList)list.get(i)).getUserFile().getType()));
+                            if (list.size() > 0) {
+                                if (((DemandList)list.get(i)).getUserFile() != null) {
+                                    tempJb.put("fileEntityId", ((DemandList)list.get(i)).getUserFile().getId());
+                                    tempJb.put("storeAddr", !StringUtil.isEmpty((((DemandList)list.get(i)).getUserFile().getStoreAddr())) ? ((DemandList)list.get(i)).getUserFile().getStoreAddr() : "" );
+                                    tempJb.put("play_url", (!StringUtil.isEmpty(((DemandList)list.get(i)).getUserFile().getPlay_url())) ? ((DemandList)list.get(i)).getUserFile().getPlay_url() : "");
+                                    tempJb.put("type", EnumUtil.formatIntTypeToStr(((DemandList)list.get(i)).getUserFile().getType()));
+                                }
+                            }
                         }
                         else if (fieldName.equals("createTime"))
                             tempJb.put("createTime", this.formatTime(((Record) list.get(i)).getCreateTime(), "yyyy-MM-dd HH:mm:ss"));
@@ -64,6 +70,7 @@ public class StringUtil {
                         List<Member> tempList = memberService.queryMemberAllOrSth(new Page(1, 30),
                                 new Member(((Station)list.get(i)).getLastTimeMemberId(), -1));
                             tempJb.put("lastTimeMemberId", tempList.size() > 0 ? tempList.get(0).getUserName() : "");
+                            tempJb.put("memberId", tempList.size() > 0 ? tempList.get(0).getId() : 0);
                          }else if (fieldName.equals("memberId") && (list.get(0).getClass()) == listenHistory.class) {
                             tempJb.put("memberId", memberService.queryMemberAllOrSth(new Page(1, 30),
                                 new Member(((listenHistory)list.get(i)).getMemberId(), -1)).get(0).getUserName());
@@ -207,6 +214,25 @@ public class StringUtil {
                 }
         }
         return result;
+    }
+
+    public JSONArray formatObToJson (ResultSet resultSet) {
+        JSONArray array = new JSONArray();
+        try {
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int count = metaData.getColumnCount();
+            resultSet.beforeFirst();
+            while (resultSet.next()) {
+                JSONObject temp = new JSONObject();
+                for (int i = 1; i <= count; i ++) {
+                    temp.put(metaData.getColumnLabel(i), resultSet.getObject(i) == null ? "" : resultSet.getObject(i));
+                }
+                array.add(temp);
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        return array;
     }
     public static void main(String[] args) {
 

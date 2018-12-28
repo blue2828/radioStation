@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.lyh.entity.*;
 import com.lyh.service.*;
 import com.lyh.service.message.JmsProducer;
+import com.lyh.util.EnumUtil;
 import com.lyh.util.StringUtil;
 import com.lyh.util.WxControllerUtil;
 import org.apache.activemq.command.ActiveMQQueue;
@@ -13,10 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,6 +64,10 @@ public class WechatController {
     @Autowired
     @Qualifier("jmsProducer")
     private JmsProducer jmsProducer;
+    @Autowired
+    private JavaMailSender javaMailSender;
+    @Value("${spring.mail.username}")
+    private String mailUserName;
     @RequestMapping("/onWxLogin")
     @ResponseBody
     public Map<String, Object> onLogin (String code, HttpSession session, String remoteKey) {
@@ -280,7 +289,7 @@ public class WechatController {
         if (storeFlag && saveFileToDataSource && saveDemandToDataSource) {
             map.put("fileId", fileId);
             Destination destination = new ActiveMQQueue("pushUrl");
-            jmsProducer.sendMessage(destination, "fileId:" + fileId);
+            jmsProducer.sendMessage(destination, "fileId:" + fileId + "&fileType=" + type + "&fileName=" + fileName);
             map.put("success", true);
         }
         else {
@@ -347,7 +356,6 @@ public class WechatController {
         jsonObject.put("thisStation", stationList.size() > 0 ? stringUtil.formatListToJson(stationList) : null);
         return jsonObject;
     }
-
     @RequestMapping("/getFileIdByAddr")
     @ResponseBody
     public JSONObject getFileIdByAddr (String storeAddr) {
@@ -357,4 +365,111 @@ public class WechatController {
         jsonObject.put("url", null != list && list.size() > 0 ? list.get(0).getId() : "");
         return jsonObject;
     }
+    @RequestMapping("/wechat/saveListen")
+    @ResponseBody
+    public Map<String, Object> saveListen (listenHistory history) {
+        Date listenTime = stringUtil.formatStrTimeToDate(stringUtil.getCurrentTimeStr(), "yyyy-MM-dd HH:mm:ss");
+        history.setListenTime(listenTime);
+        Map<String, Object> map = new HashMap<String, Object>();
+        int flag = listenHistoryService.saveListen(history);
+        switch (flag) {
+            case 0 :
+                map.put("success", false);
+                logger.info("保存收听历史到数据库失败");
+                break;
+            default :
+                map.put("success", true);
+        }
+        return map;
+    }
+    @RequestMapping("/wechat/delSelfHistory")
+    @ResponseBody
+    public Map<String, Object> delSelfHistory (String id) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        int flag = listenHistoryService.delSelfHistory(id);
+        map.put("success", flag > 0 ? true : false);
+        return map;
+    }
+    @RequestMapping("/app/updateImgHeader")
+    @ResponseBody
+    public Map<String, Object> updateImgHeader (@RequestParam(value = "imgHeader") MultipartFile multipartFile, int memberId) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        String fileName = multipartFile.getOriginalFilename();
+        String type = fileName.substring(fileName.lastIndexOf("."));
+        fileName = fileName.substring(0, fileName.lastIndexOf("."));
+        String imageHeaderAddr = StringUtil.mkFileName(fileName, type);
+        Member m = new Member();
+        m.setId(memberId);
+        imageHeaderAddr = StringUtil.isOsWindows() ? "d:/fileUpload/" + imageHeaderAddr : "/usr/local/fileUpload";
+        m.setImageHeaderAddr(imageHeaderAddr);
+        int flag = memberService.onlyRefreshImg(m);
+        boolean toDisk = false;
+        try {
+            multipartFile.transferTo(new File(imageHeaderAddr));
+            toDisk = true;
+        }catch (Exception e) {
+            toDisk =false;
+            e.printStackTrace();
+        }
+        if (flag > 0 && toDisk)
+            map.put("success", true);
+        else
+            map.put("success", false);
+        if (flag == 0)
+            logger.error("头像文件保存到数据库失败");
+        if (!toDisk)
+            logger.error("投降文件保存到磁盘失败");
+        return map;
+    }
+    @RequestMapping("/app/updateMemberByCondition")
+    @ResponseBody
+    public Map<String, Object> updateMemberByCondition (Member member, String sex) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        if (StringUtil.isEmpty(sex))
+            member.setSex(-1);
+        int flat = memberService.updateMemberByCondition(member);
+        map.put("success", flat > 0 ? true : false);
+        return map;
+    }
+    @RequestMapping("/app/onlyUpdateStateOnDemand")
+    @ResponseBody
+    public Map<String, Object> onlyUpdateStateOnDemand (DemandList list) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        int checkState = demandService.getStateById(list.getId());
+        if (checkState == 1) {
+            map.put("success", true);
+            return map;
+        }
+        list.setState(1);
+        boolean flag = demandService.updateDemandList(list, true);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(mailUserName);
+            message.setSubject("学院广播台通知");
+            Member m = new Member(list.getMemberId(), -1);
+            List<Member> memberList = memberService.queryMemberAllOrSth(new Page(1, 30), m);
+            UserFile userFile = fileServiceImpl.getFileById(list.getFileId());
+            StringBuffer buffer = new StringBuffer();
+            String text = buffer.append(memberList.get(0).getUserName()).append(EnumUtil.formatIntSexToStr(memberList.get(0).getSex())).append("士")
+                    .append("给你分享了一").append(userFile.getType() == 0 ? "首".concat("" + (list.getMusicName() == null ? "歌" : "《".concat(list.getMusicName()).concat("》"))) : "篇文章")
+                    .append("，请到微信搜索学院广播电台小程序收听").toString();
+            message.setTo(list.getEmail());
+            message.setText(text);
+            javaMailSender.send(message);
+            SimpleMailMessage message1 = new SimpleMailMessage();
+            message1.setFrom(mailUserName);
+            message1.setTo(memberList.get(0).getEmail());
+            buffer = new StringBuffer();
+            text = buffer.append("你分享给").append(list.getToSb()).append(userFile.getType() == 0 ? "的歌" : "的文章").
+                    append("已经在播，请前往小程序收听").toString();
+            message1.setSubject("学院广播台通知");
+            message1.setText(text);
+            javaMailSender.send(message1);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+        map.put("success", flag);
+        return map;
+    }
 }
+

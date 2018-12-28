@@ -6,6 +6,9 @@ import com.lyh.service.IRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class RecordService implements IRecordService {
     @Autowired
@@ -21,5 +24,17 @@ public class RecordService implements IRecordService {
             e.printStackTrace();
         }
         return flag;
+    }
+
+    @Override
+    public List getAllRecordList() {
+        List<Record> list = new ArrayList<>();
+        try {
+            list = recordDao.getAllRecordList();
+        }catch (Exception e) {
+            list.clear();
+            e.printStackTrace();
+        }
+        return list;
     }
 }

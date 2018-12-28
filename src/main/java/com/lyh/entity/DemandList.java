@@ -12,6 +12,17 @@ public class DemandList implements java.io.Serializable{
         this.fileId = fileId;
     }
 
+    public DemandList(int id, int state, int fileId, Date demandTime, String toSb, String email, String musicName, String demandDesc) {
+        this.id = id;
+        this.state = state;
+        this.fileId = fileId;
+        this.demandTime = demandTime;
+        this.toSb = toSb;
+        this.email = email;
+        this.musicName = musicName;
+        this.demandDesc = demandDesc;
+    }
+
     public int getId() {
         return id;
     }

@@ -3,6 +3,7 @@ package com.lyh.service;
 
 import com.lyh.entity.Member;
 import com.lyh.entity.Page;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface IMemberService {
     int selectMaxId();
     public Member selectMemberByKey(Member member);
     public int refreshKey(Member member);
+    int onlyRefreshImg (Member member);
+    int updateMemberByCondition (@Param("member") Member member);
 }
