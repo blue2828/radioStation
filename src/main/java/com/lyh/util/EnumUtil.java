@@ -20,6 +20,7 @@ public class EnumUtil {
                 break;
             case 1 : str = "未在线";
                 break;
+            case 2 : str = "禁播";
         }
         return str;
     }

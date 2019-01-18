@@ -78,4 +78,16 @@ public class DemandService implements IDemandService {
         return flag;
     }
 
+    @Override
+    public List getDemandToMe(int memberId) {
+        List list = new ArrayList();
+        try {
+            list = demandDao.getDemandToMe(memberId);
+        }catch (Exception e) {
+            list.clear();
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 }

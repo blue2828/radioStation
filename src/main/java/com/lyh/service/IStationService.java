@@ -12,4 +12,5 @@ public interface IStationService {
     boolean updateStationState(Station station);
     Date getLastTime (int id);
     List<Station> getCurrentStation(boolean isOnlyQueryBroadcast);
+    public boolean onlyUpdateState(Station station);
 }

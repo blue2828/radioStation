@@ -38,7 +38,7 @@
     <script type="text/javascript" src="../common/js/ajaxFileUpload.js"></script>
     <script>
         mui.init();
-        var ws = new WebSocket ("ws://182.90.63.70:8088/pushUrl");
+        var ws = new WebSocket ("ws://182.90.54.2:8088/pushUrl");
         var mask = mui.createMask(() => {
 
         });//callback为用户点击蒙版时自动执行的回调；
@@ -200,7 +200,8 @@
                     else
                         mui.toast('上传失败');
                 },
-                error: function () {
+                error: function () {+
+
                     mui.toast('服务器请求失败');
                 }
             });

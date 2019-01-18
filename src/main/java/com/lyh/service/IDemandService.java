@@ -10,4 +10,5 @@ public interface IDemandService {
     List<DemandList> getSelfDemand (int memberId);
     public List<Object> getAllNotBroadcastDemandList ();
     public int getStateById (int id);
+    public List getDemandToMe (int memberId);
 }

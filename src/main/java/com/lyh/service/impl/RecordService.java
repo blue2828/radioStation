@@ -27,14 +27,51 @@ public class RecordService implements IRecordService {
     }
 
     @Override
-    public List getAllRecordList() {
+    public List getAllRecordList(int memberId) {
         List<Record> list = new ArrayList<>();
         try {
-            list = recordDao.getAllRecordList();
+            list = recordDao.getAllRecordList(memberId);
         }catch (Exception e) {
             list.clear();
             e.printStackTrace();
         }
         return list;
+    }
+
+    @Override
+    public boolean updateDemandIds(int recordId, String ids) {
+        boolean flag = false;
+        try {
+            recordDao.updateDemandIds(recordId, ids);
+            flag = true;
+        }catch (Exception e) {
+            flag = false;
+            e.printStackTrace();
+        }
+        return flag;
+    }
+
+    @Override
+    public String getDemandIdsById(int id) {
+        String ids = "";
+        try {
+            ids = recordDao.getDemandIdsById(id);
+        }catch (Exception e) {
+            ids = "";
+            e.printStackTrace();
+        }
+        return ids;
+    }
+
+    @Override
+    public int getIdByStoreAddr(String addr) {
+        int id = -1;
+        try {
+            id = recordDao.getIdByStoreAddr(addr);
+        }catch (Exception e) {
+            id = -1;
+            e.printStackTrace();
+        }
+        return id;
     }
 }

@@ -39,6 +39,7 @@ public class StationService implements IStationService{
     }
 
     @Override
+    @Transactional
     public boolean updateStationState(Station station) {
         boolean flag = false;
         try {
@@ -73,5 +74,19 @@ public class StationService implements IStationService{
             e.printStackTrace();
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public boolean onlyUpdateState(Station station) {
+        boolean flag = false;
+        try {
+            stationDao.onlyUpdateState(station);
+            flag = true;
+        }catch (Exception e) {
+            flag = false;
+            e.printStackTrace();
+        }
+        return flag;
     }
 }

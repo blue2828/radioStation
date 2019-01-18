@@ -225,7 +225,10 @@ public class StringUtil {
             while (resultSet.next()) {
                 JSONObject temp = new JSONObject();
                 for (int i = 1; i <= count; i ++) {
-                    temp.put(metaData.getColumnLabel(i), resultSet.getObject(i) == null ? "" : resultSet.getObject(i));
+                    Object obj = resultSet.getObject(i);
+                    if (obj instanceof Date)
+                        this.formatTime((Date) obj, "yyyy-MM-dd HH:mm:ss");
+                    temp.put(metaData.getColumnLabel(i), resultSet.getObject(i) == null ? "" : obj);
                 }
                 array.add(temp);
             }

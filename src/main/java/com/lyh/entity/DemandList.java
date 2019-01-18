@@ -5,7 +5,7 @@ import java.util.Date;
 public class DemandList implements java.io.Serializable{
     private int id, state, memberId, fileId;
     private Date demandTime;
-    private String toSb, email, musicName, demandDesc;
+    private String toSb, email, musicName, demandDesc, wechatNo;
     private UserFile userFile;
     public DemandList(int memberId, int fileId) {
         this.memberId = memberId;
@@ -22,7 +22,17 @@ public class DemandList implements java.io.Serializable{
         this.musicName = musicName;
         this.demandDesc = demandDesc;
     }
-
+    public DemandList(int id, int state, int fileId, Date demandTime, String toSb, String email, String musicName, String demandDesc, String wechatNo) {
+        this.id = id;
+        this.state = state;
+        this.fileId = fileId;
+        this.demandTime = demandTime;
+        this.toSb = toSb;
+        this.email = email;
+        this.musicName = musicName;
+        this.demandDesc = demandDesc;
+        this.wechatNo = wechatNo;
+    }
     public int getId() {
         return id;
     }
@@ -101,6 +111,14 @@ public class DemandList implements java.io.Serializable{
 
     public void setUserFile(UserFile userFile) {
         this.userFile = userFile;
+    }
+
+    public String getWechatNo() {
+        return wechatNo;
+    }
+
+    public void setWechatNo(String wechatNo) {
+        this.wechatNo = wechatNo;
     }
 
     public DemandList() {

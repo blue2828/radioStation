@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Record implements java.io.Serializable {
     private int id, stationId, memberId;
-    private String name, storeAddr;
+    private String name, storeAddr, demandIds;
     private Date createTime;
 
     public Record(int stationId, int memberId, String name, String storeAddr, Date createTime) {
@@ -61,6 +61,14 @@ public class Record implements java.io.Serializable {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public String getDemandIds() {
+        return demandIds;
+    }
+
+    public void setDemandIds(String demandIds) {
+        this.demandIds = demandIds;
     }
 
     public Record() {

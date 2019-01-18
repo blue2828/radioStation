@@ -66,4 +66,25 @@ public class DemandDao implements IDemandDao {
         return demandDao.getStateById(id);
     }
 
+    @Override
+    public List getDemandToMe(int memberId) {
+        String sql = "SELECT d.id AS d_id, d.state, d.musicName, d.demandDesc, m.userName, m.nickName, CASE m.sex WHEN 0 THEN '男'\n" +
+                " WHEN 1 THEN '女' END AS sex, m.wechatNo, u.id AS file_id, u.storeAddr, CASE u.type WHEN 0 THEN '歌曲' WHEN 1 THEN '文章' \n" +
+                " WHEN 2 THEN '图片' END AS fileType, u.play_url, (SELECT userName FROM member WHERE id = s.lastTimeMemberId) AS zhubo, s.name, \n" +
+                " (SELECT storeAddr FROM record AS re WHERE re.demandIds LIKE CONCAT('%', d.`id`, '%') LIMIT 1 )AS r_storeAddr FROM demandlist d \n" +
+                " JOIN member m ON d.`memberId` = m.id JOIN userfile u ON d.`fileId` = u.id\n" +
+                " JOIN station s WHERE d.state = 1 AND m.wechatNo = d.wechatNo AND m.id = " + memberId + " GROUP BY d.id";
+        List resultList = jdbcTemplate.query(sql, new RowMapper<Object>() {
+
+            @Nullable
+            @Override
+            public List<JSONArray> mapRow(ResultSet resultSet, int i) throws SQLException {
+                JSONArray array = stringUtil.formatObToJson(resultSet);
+                List<JSONArray> list = new ArrayList<>();
+                list.add(array);
+                return list;
+            }
+        });
+        return resultList;
+    }
 }

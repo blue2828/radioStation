@@ -14,7 +14,7 @@
 <body>
 <table class="layui-table" lay-filter="tab_filter" id="lay_tb"></table>
 <div id="tb" style="display:none;">
-    <button type="button" lay-event="disconnect"  class="layui-btn layui-btn-danger layui-btn-mini"><i class="layui-icon">&#x1006;</i><span>关播</span></button>
+    <button id="opBtn" type="button" lay-event="disconnect"  class="layui-btn layui-btn-danger layui-btn-mini"><i class="layui-icon">&#x1006;</i><span>关播</span></button>
 </div>
 <div id="uploadFrame" style="display:none;">
     <div class="layui-upload">
@@ -30,7 +30,6 @@
 <script type="text/javascript" >
     layui.use(['table','layer','element','upload'],function(){
         var layer = layui.layer, $ = layui.jquery, table = layui.table, element = layui.element, upload = layui.upload;
-
         var tbOp = table.render({
             url: '../../getStation',
             elem: "#lay_tb",
@@ -60,32 +59,34 @@
         table.on("tool(tab_filter)", function(obj){
             var event = obj.event;
             var data = obj.data;
-            if(event == 'remove'){
-                layer.confirm('是否要删除？', {icon: 3, title: '系统提示'}, function(index){
-                    $.get('../../getCurrentMember', (res, state, xhr) => {
-                        let id = res.currentMember[0].id;
-                        if (id == data.id) {
-                            layer.msg('自己不可删除自己', {icon : 5});
-                            return;
-                        }
-                        $.post('../../delMember', {'idArr': data.id}, function(res){
-                            if(res.success) {
-                                layer.msg('删除成功');
-                                layer.close(index);
-                                tbOp.reload({
-                                    url:"../../getMemberInfo"
-                                });
-                            }
-                            else{
-                                layer.msg(res.errMsg, {icon:5, time:800});
-                                layer.close(index);
-                                tbOp.reload({
-                                    url: "../../getMemberInfo"
-                                });
-                            }
-                        }, 'json');
-                    }, 'json');
+            if(event == 'disconnect'){
+                var opType = $('#opBtn').find('span:eq(0)').html();
+                /*switch (opType) {
+                    case '关播' :
+                        layer.confirm('是否要关播？', {icon: 3, title: '系统提示'}, function(index){
+                            $.get("../web/onlyUpdateState", {id: data.id, stationState: 2}, function (res) {
 
+                            }, 'json');
+                        });
+                        break;
+                    default :
+                        layer.confirm('是否要恢复开播？', {icon: 3, title: '系统提示'}, function(index){
+                            $.get("../web/onlyUpdateState", {id: data.id, stationState: 1}, function (res) {
+
+                            }, 'json');
+                        });
+                }*/
+
+                layer.confirm(opType == '关播' ? '是否要关播？' : "是否恢复开播", {icon: 3, title: '系统提示'}, function(index){
+                    let type = opType == '关播' ? 2 : 1;
+                    $.get("../../web/onlyUpdateState", {id: data.id, stationState: type}, function (res) {
+                        if (res.success) {
+                            $('#opBtn').find('span:eq(0)').html(type == 2 ? '恢复开播' : '关播');
+                            layer.msg(type == 2 ? "关播成功" : '恢复开播成功', {icon: 6, time: 1000});
+                        }
+                        else
+                            layer.msg(type == 2 ? "关播失败" : '恢复开播失败', {icon: 5, time: 1000});
+                    }, 'json');
                 });
             }
         });

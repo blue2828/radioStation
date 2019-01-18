@@ -123,7 +123,8 @@ public class FileController {
         userFile.setType(-1);
         List<UserFile> list = fileServiceImpl.getAllFiles(userFile, new Page(1, 30));
         UserFile tempFile = list.get(0);
-        if (null != tempFile.getPlay_url()) {
+        String httpType = request.getHeader("x-requested-with");
+        if (null != tempFile.getPlay_url() && "XMLHttpRequest".equalsIgnoreCase(httpType)) {
             if (tempFile.getPlay_url().indexOf("kugou.com") > -1) {
                 PrintWriter writer = null;
                 try {
@@ -162,7 +163,7 @@ public class FileController {
             else {
                 BufferedReader reader = null;
                 InputStreamReader inputStreamReader = null;
-                response.setContentType("text/html;charset=utf-8");
+                response.setContentType("text/html;charset=gb2312");
                 PrintWriter writer = null;
                 try {
                     inputStreamReader = new InputStreamReader(inputStream, "gb2312");

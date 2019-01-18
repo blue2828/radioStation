@@ -34,6 +34,7 @@ import javax.jms.Destination;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.*;
 
 @CrossOrigin
@@ -58,6 +59,9 @@ public class WechatController {
     @Autowired
     @Qualifier("fileService")
     private IFileService fileServiceImpl;
+
+    @Autowired
+    private IRecordService recordService;
     @Autowired
     @Qualifier("stationService")
     private IStationService stationService;
@@ -433,15 +437,20 @@ public class WechatController {
     }
     @RequestMapping("/app/onlyUpdateStateOnDemand")
     @ResponseBody
-    public Map<String, Object> onlyUpdateStateOnDemand (DemandList list) {
+    public Map<String, Object> onlyUpdateStateOnDemand (HttpSession session, DemandList list) {
         Map<String, Object> map = new HashMap<String, Object>();
         int checkState = demandService.getStateById(list.getId());
-        if (checkState == 1) {
+        if (checkState == 1) {  //防止重复执行下面的逻辑
             map.put("success", true);
             return map;
         }
         list.setState(1);
         boolean flag = demandService.updateDemandList(list, true);
+        Map<String, String> ids = (Map<String, String>) session.getAttribute("currentRecordDemands");
+        if (ids == null)
+            ids = new HashMap<String, String>();
+        ids.put(String.valueOf(list.getId()), String.valueOf(list.getId()));
+        session.setAttribute("currentRecordDemands", ids);
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(mailUserName);
@@ -470,6 +479,62 @@ public class WechatController {
         }
         map.put("success", flag);
         return map;
+    }
+    @RequestMapping("/wx/getDemandToMe")
+    @ResponseBody
+    public JSONObject getDemandToMe (int memberId) {
+        JSONObject jsonObject = new JSONObject ();
+        List resultList = demandService.getDemandToMe(memberId);
+        JSONArray arr = new JSONArray();
+        Iterator it = resultList.iterator();
+        while (it.hasNext()) {
+            ArrayList<JSONArray> arrayList = (ArrayList<JSONArray>) it.next();
+            for (JSONArray tempArr: arrayList) {
+                for (int i = 0; i < tempArr.size(); i ++) {
+                    arr.add(tempArr.get(i));
+                }
+            }
+        }
+        jsonObject.put("list", arr.size() > 0 ? arr : new JSONArray());
+        return jsonObject;
+    }
+    @RequestMapping("/wx/downloadTextFile")
+    public void downloadTextFile (String storeAddr, HttpServletResponse response) {
+        File file = new File(storeAddr);
+        if (file.exists() && file != null) {
+            BufferedOutputStream outputStream = null;
+            OutputStream out = null;
+            InputStream in = null;
+            BufferedInputStream inputStream = null;
+            try {
+                  response.setHeader("Content-Disposition", "attachment;fileName=".concat(URLEncoder.encode(storeAddr.substring(storeAddr.lastIndexOf("/") + 1), "utf-8")));
+                  out = response.getOutputStream();
+                  in = new FileInputStream(file);
+                  inputStream = new BufferedInputStream(in);
+                  outputStream = new BufferedOutputStream(out);
+                  int temp = 0;
+                  byte[] bytes = new byte[1024];
+                  while ((temp = inputStream.read(bytes)) != -1) {
+                      outputStream.write(bytes, 0, temp);
+                      outputStream.flush();
+                  }
+            }catch (Exception e) {
+                e.printStackTrace();
+            }finally {
+                    try {
+                        if (null != in)
+                            in.close();
+                        if (null != inputStream)
+                            in.close();
+                        if (null != out)
+                            out.close();
+                        if (null != outputStream)
+                            outputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+            }
+        }
     }
 }
 

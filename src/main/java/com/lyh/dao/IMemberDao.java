@@ -37,7 +37,7 @@ public interface IMemberDao {
             "nickName = #{member.nickName}, " +
             "label = #{member.label}, " +
             "roleId = #{member.roleId}, " +
-            "lastTimeLogin = #{date} <if test=\"isWx != true\">,openid = #{member.openid}</if><if test=\"isWx != true\">, session_key = #{member.session_key}</if> where id = #{member.id}</script>")
+            "lastTimeLogin = #{date}, wechatNo = #{member.wechatNo} <if test=\"isWx != true\">,openid = #{member.openid}</if><if test=\"isWx != true\">, session_key = #{member.session_key}</if> where id = #{member.id}</script>")
     void editMember (@Param("member") Member member, @Param("date") String date, @Param("isWx") boolean isWx);
     @Select("update member set lastTimeLogin = #{lastTimeLogin} where id = #{id}")
     void refreshDate (@Param("lastTimeLogin") String lastTimeLogin, @Param("id") int id );

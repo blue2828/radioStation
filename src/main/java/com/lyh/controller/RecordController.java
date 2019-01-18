@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import sun.net.util.IPAddressUtil;
 
 import javax.jms.Destination;
 import javax.servlet.http.HttpServletResponse;
@@ -67,6 +68,27 @@ public class RecordController {
                 multipartFile.transferTo(file);
                 if (flag) {
                     resultMap.put("success", true);
+                    Map<String, String> ids = (Map<String, String>) session.getAttribute("currentRecordDemands");
+                    int thisId = recordService.getIdByStoreAddr(storeAddr);
+                    StringBuffer strIds = new StringBuffer();
+                    if (ids != null) {
+                        Iterator it = ids.keySet().iterator();
+                        int count = 0;
+                        while (it.hasNext()) {
+                            String key = (String) it.next();
+                            if (count == ids.size() - 1)
+                                strIds.append(ids.get(key));
+                            else {
+                                strIds.append(ids.get(key).concat(","));
+                            }
+                            count ++;
+                        }
+                        boolean updateDemandIds = recordService.updateDemandIds(thisId, strIds.toString());
+                        if (updateDemandIds)
+                            logger.info("更改点播id成功");
+                        else
+                            logger.info("更改点播id失败");
+                    }
                     logger.info("录音文件地址及信息存入数据库成功");
                 }else
                     logger.error("录音文件地址及信息存入数据库失败");
@@ -133,9 +155,14 @@ public class RecordController {
     }
     @RequestMapping("/getAllRecordList")
     @ResponseBody
-    public JSONObject getAllRecordList () {
+    public JSONObject getAllRecordList (String memberId) {
         JSONObject jsonObject = new JSONObject ();
-        List list = recordService.getAllRecordList();
+        int id = 0;
+        if (StringUtil.isEmpty(memberId))
+            id = 0;
+        else
+            id = Integer.parseInt(memberId);
+        List list = recordService.getAllRecordList(id);
         Iterator it = list.iterator();
         while (it.hasNext()) {
             ArrayList<JSONArray> list2 = (ArrayList<JSONArray>) it.next();

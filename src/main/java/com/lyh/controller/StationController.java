@@ -38,7 +38,8 @@ public class StationController {
         jsonObject.put("msg", "");
         jsonObject.put("code", 0);
         jsonObject.put("data", array);
-        jsonObject.put("count", stationService.countStation(page));
+        jsonObject.put("count", stationService.countStation(new Page(page.getPage() == 0 ? 1 : page.getPage(),
+                page.getLimit() == 0 ? 30 : page.getLimit())));
         return jsonObject;
     }
     @RequestMapping("/updateStationState")
@@ -62,6 +63,14 @@ public class StationController {
         List<Station> info = stationService.getCurrentStation(true);
         JSONArray array = info.size() > 0 ? stringUtil.formatListToJson(info) : null;
         jsonObject.put("result", array);
+        return jsonObject;
+    }
+    @RequestMapping("/web/onlyUpdateState")
+    @ResponseBody
+    public JSONObject onlyUpdateState (Station station) {
+        JSONObject jsonObject = new JSONObject();
+        boolean flag = stationService.onlyUpdateState(station);
+        jsonObject.put("success", flag);
         return jsonObject;
     }
 }

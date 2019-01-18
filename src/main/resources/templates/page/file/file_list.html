@@ -84,6 +84,9 @@
                 });
             }
         });
+        window.onerror = function (msg, url) {
+            alert(msg);
+        };
         $('.closeMusicBtn').mouseover(() => {
             $('.closeMusicBtn').css('background', '#FF5722');
             $('.closeMusicBtn').find('img:eq(0)').attr('src', '../../images/closeBtn_white.png');
@@ -147,6 +150,9 @@
                                             contentType: "text/json;charset=utf-8",
                                             success : function(res) {
                                                 document.querySelector("#player").src = res;
+                                            },
+                                            error: function () {
+                                                layer.msg('播放文件错误');
                                             }
                                         });
                                     }

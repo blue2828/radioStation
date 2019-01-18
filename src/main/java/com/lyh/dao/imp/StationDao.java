@@ -36,4 +36,9 @@ public class StationDao implements IStationDao {
     public  List<Station> getCurrentStation(boolean isOnlyQueryBroadcast) {
         return stationDao.getCurrentStation(isOnlyQueryBroadcast);
     }
+
+    @Override
+    public void onlyUpdateState(Station station) {
+        stationDao.onlyUpdateState(station);
+    }
 }

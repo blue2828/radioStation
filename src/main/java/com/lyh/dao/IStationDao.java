@@ -20,4 +20,6 @@ public interface IStationDao {
     Date getLastTime(@Param("id") int id);
     @Select("<script>select * from station <if test=\"isOnlyQueryBroadcast\"> where stationState = 0</if></script>")
     List<Station> getCurrentStation (@Param("isOnlyQueryBroadcast") boolean isOnlyQueryBroadcast); //获取直播内容
+    @Update("update station set stationState = #{station.stationState} where id = #{station.id}")
+    void onlyUpdateState (@Param("station") Station station);
 }
